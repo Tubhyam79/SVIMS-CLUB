@@ -1,0 +1,3730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics Arena — Elite Quiz Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════ CSS VARIABLES ═══════════════════ */
+:root {
+  --bg: #04080f;
+  --surface: #080f1c;
+  --surface2: #0c1528;
+  --surface3: #111e36;
+  --accent: #00e5ff;
+  --accent2: #ff5722;
+  --accent3: #76ff03;
+  --gold: #ffd600;
+  --silver: #e0e0e0;
+  --bronze: #ff8f00;
+  --green: #00e676;
+  --red: #ff1744;
+  --purple: #d500f9;
+  --text: #ecf0f1;
+  --muted: #546e7a;
+  --border: rgba(0,229,255,0.15);
+  --border2: rgba(255,87,34,0.2);
+  --glow: 0 0 30px rgba(0,229,255,0.25);
+  --glow-r: 0 0 30px rgba(255,87,34,0.3);
+  --glow-g: 0 0 30px rgba(0,230,118,0.3);
+  --radius: 4px;
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.light-mode {
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #e8edf2;
+  --surface3: #dce4ec;
+  --accent: #0288d1;
+  --accent2: #f4511e;
+  --text: #1a2332;
+  --muted: #78909c;
+  --border: rgba(2,136,209,0.2);
+  --glow: 0 4px 20px rgba(2,136,209,0.2);
+}
+
+/* ═══════════════════ RESET & BASE ═══════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ═══════════════════ BACKGROUNDS ═══════════════════ */
+.bg-layer {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+}
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridMove 25s linear infinite;
+}
+.bg-glow-layer {
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 50%, rgba(0,229,255,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(255,87,34,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 90%, rgba(118,255,3,0.02) 0%, transparent 70%);
+}
+@keyframes gridMove {
+  from { background-position: 0 0; }
+  to { background-position: 50px 50px; }
+}
+
+/* ═══════════════════ SCREENS ═══════════════════ */
+.screen {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.screen.active { display: flex; }
+
+/* ═══════════════════ TYPOGRAPHY ═══════════════════ */
+.logo {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--accent) 0%, #00b0ff 40%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(0,229,255,0.4));
+  animation: logoPulse 4s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%, 100% { filter: drop-shadow(0 0 40px rgba(0,229,255,0.4)); }
+  50% { filter: drop-shadow(0 0 60px rgba(0,229,255,0.7)); }
+}
+.logo-tagline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* ═══════════════════ BUTTONS ═══════════════════ */
+.btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition);
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  opacity: 0;
+  transition: opacity var(--transition);
+  background: rgba(255,255,255,0.1);
+}
+.btn:hover::after { opacity: 1; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+
+.btn-primary { background: var(--accent); color: var(--bg); }
+.btn-primary:hover { box-shadow: 0 6px 24px rgba(0,229,255,0.4); transform: translateY(-1px); }
+.btn-operator { background: var(--accent2); color: white; }
+.btn-operator:hover { box-shadow: 0 6px 24px rgba(255,87,34,0.4); transform: translateY(-1px); }
+.btn-danger { background: var(--red); color: white; }
+.btn-danger:hover { box-shadow: 0 6px 24px rgba(255,23,68,0.4); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-success { background: var(--green); color: var(--bg); }
+.btn-warning { background: var(--gold); color: var(--bg); }
+.btn-purple { background: var(--purple); color: white; }
+.btn-sm { font-size: 0.72rem; padding: 8px 16px; }
+.btn-xs { font-size: 0.68rem; padding: 6px 12px; }
+.btn-lg { font-size: 0.9rem; padding: 16px 40px; }
+.btn-icon { padding: 10px; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+
+/* ═══════════════════ CARDS ═══════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.card-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+.card-wide { max-width: 700px; }
+.card-wider { max-width: 900px; }
+
+/* ═══════════════════ FORM ELEMENTS ═══════════════════ */
+.input-group { margin-bottom: 16px; }
+.input-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.input-group input,
+.input-group select,
+.input-group textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 11px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  outline: none;
+  border-radius: var(--radius);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+.input-group select option { background: var(--surface2); }
+.input-group textarea { resize: vertical; min-height: 100px; }
+
+/* ═══════════════════ LANDING ═══════════════════ */
+#landing { text-align: center; gap: 0; }
+.landing-btns {
+  display: flex;
+  gap: 16px;
+  margin-top: 48px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.qr-section {
+  margin-top: 40px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.qr-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  text-align: center;
+  min-width: 160px;
+}
+.qr-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.qr-canvas { display: block; margin: 0 auto 10px; }
+.qr-url {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+  word-break: break-all;
+  max-width: 140px;
+}
+
+/* Dark/light mode toggle */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--accent); }
+
+/* Network status */
+.network-status {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.net-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: netPulse 2s ease-in-out infinite;
+}
+.net-dot.offline { background: var(--red); animation: none; }
+@keyframes netPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ═══════════════════ STUDENT QUIZ HEADER ═══════════════════ */
+.quiz-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(4,8,15,0.96);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(12px);
+  flex-wrap: wrap;
+}
+.hdr-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+}
+.hdr-round { background: rgba(255,87,34,0.12); border: 1px solid rgba(255,87,34,0.3); color: var(--accent2); }
+.hdr-team { background: rgba(0,229,255,0.08); border: 1px solid var(--border); color: var(--accent); }
+.hdr-q { color: var(--muted); font-size: 0.75rem; margin-left: auto; font-family: 'JetBrains Mono', monospace; }
+.hdr-score-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: rgba(0,229,255,0.08);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+}
+.hdr-rank-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--gold);
+  background: rgba(255,214,0,0.08);
+  border: 1px solid rgba(255,214,0,0.2);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+}
+
+/* Progress bar */
+.progress-bar-wrap {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--surface2);
+  z-index: 99;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 0.5s ease;
+}
+
+/* ═══════════════════ TIMER ═══════════════════ */
+.timer-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 80px auto 24px;
+  position: relative;
+}
+.timer-ring-svg { width: 150px; height: 150px; }
+.timer-circle-bg { fill: none; stroke: var(--surface2); stroke-width: 9; }
+.timer-circle-fg {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dashoffset: 0;
+  transform: rotate(-90deg);
+  transform-origin: 75px 75px;
+  transition: stroke-dashoffset 0.8s linear, stroke 0.5s;
+}
+.timer-circle-fg.warning { stroke: #ffab40; animation: timerPulse 0.6s ease-in-out infinite; }
+.timer-circle-fg.danger { stroke: var(--red); animation: timerPulse 0.3s ease-in-out infinite; }
+@keyframes timerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.timer-number {
+  position: absolute;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 3rem;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  transition: color 0.3s;
+}
+.timer-number.warning { color: #ffab40; }
+.timer-number.danger { color: var(--red); }
+.timer-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.25em;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+/* Last 5 sec burst animation */
+.countdown-burst {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.burst-number {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 30vw;
+  color: var(--red);
+  opacity: 0;
+  animation: bursting 1s ease-out forwards;
+}
+@keyframes bursting {
+  0% { opacity: 0.6; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(2); }
+}
+
+/* ═══════════════════ QUESTION AREA (STUDENT) ═══════════════════ */
+.question-area {
+  width: 100%;
+  max-width: 640px;
+  padding: 0 20px 80px;
+  margin: 0 auto;
+}
+.case-banner {
+  background: rgba(255,87,34,0.07);
+  border-left: 3px solid var(--accent2);
+  border: 1px solid rgba(255,87,34,0.2);
+  border-left-width: 3px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--accent2);
+  line-height: 1.5;
+  border-radius: var(--radius);
+}
+.q-number-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.q-num-badge {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  background: rgba(0,229,255,0.08);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: var(--radius);
+}
+.q-difficulty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.q-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.55;
+  color: var(--text);
+  margin-bottom: 20px;
+  text-align: center;
+}
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.option-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 16px 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.4;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.option-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,229,255,0.05);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.option-btn:hover:not(:disabled)::before { opacity: 1; }
+.option-btn:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,229,255,0.15); }
+.option-btn:disabled { cursor: not-allowed; }
+.option-btn.selected { border-color: var(--accent); background: rgba(0,229,255,0.1); }
+.option-btn.correct { border-color: var(--green); background: rgba(0,230,118,0.12); color: var(--green); }
+.option-btn.wrong { border-color: var(--red); background: rgba(255,23,68,0.12); color: var(--red); }
+.opt-letter {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* ═══════════════════ CONFIRM POPUP ═══════════════════ */
+.confirm-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.confirm-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: var(--glow);
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.confirm-question {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.confirm-answer {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 24px;
+  padding: 10px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+}
+.confirm-btns { display: flex; gap: 12px; justify-content: center; }
+
+/* ═══════════════════ SCORE FLASH ═══════════════════ */
+.score-flash {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Bebas Neue', cursive;
+  font-size: 5rem;
+  letter-spacing: 0.05em;
+  z-index: 999;
+  pointer-events: none;
+  animation: scoreFlash 1.2s ease-out forwards;
+}
+.score-flash.plus { color: var(--green); text-shadow: 0 0 30px rgba(0,230,118,0.5); }
+.score-flash.minus { color: var(--red); text-shadow: 0 0 30px rgba(255,23,68,0.5); }
+.score-flash.zero { color: var(--muted); }
+@keyframes scoreFlash {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -130%) scale(0.9); }
+}
+
+/* Rank feedback banner */
+.rank-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  z-index: 500;
+  display: flex;
+  gap: 16px;
+  animation: slideUpBanner 0.4s ease;
+  box-shadow: var(--glow);
+  white-space: nowrap;
+}
+@keyframes slideUpBanner { from { transform: translateX(-50%) translateY(40px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+
+/* Mini leaderboard */
+.mini-lb {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 16px;
+}
+.mini-lb-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.mini-lb-row {
+  display: flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-bottom: 1px solid rgba(0,229,255,0.05);
+  font-size: 0.85rem;
+  gap: 10px;
+  transition: background var(--transition);
+}
+.mini-lb-row.me { background: rgba(0,229,255,0.06); border-left: 2px solid var(--accent); }
+.mini-lb-row.eliminated-row { opacity: 0.35; filter: grayscale(0.8); }
+.mini-lb-rank {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 0.9rem;
+  width: 24px;
+  text-align: center;
+  color: var(--muted);
+}
+.mini-lb-rank.r1 { color: var(--gold); }
+.mini-lb-rank.r2 { color: var(--silver); }
+.mini-lb-rank.r3 { color: var(--bronze); }
+.mini-lb-name { flex: 1; font-weight: 500; }
+.mini-lb-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+.mini-lb-accuracy {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* ═══════════════════ WAITING SCREEN ═══════════════════ */
+#waiting-screen { text-align: center; gap: 16px; }
+.waiting-orb {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  border-top-color: transparent;
+  animation: spin 1.5s linear infinite;
+  margin: 0 auto;
+  box-shadow: var(--glow);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.waiting-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 2.5rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.waiting-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.waiting-team {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 8px 20px;
+  border-radius: 30px;
+}
+.dots::after {
+  content: '';
+  animation: dots 1.5s steps(4) infinite;
+}
+@keyframes dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} }
+
+/* ═══════════════════ RESULTS / LEADERBOARD ═══════════════════ */
+#results-screen { align-items: center; }
+.results-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 620px;
+  overflow: hidden;
+}
+.results-header {
+  background: linear-gradient(135deg, var(--surface2), var(--surface));
+  padding: 24px 30px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.results-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 2rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.results-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.leaderboard { padding: 16px; }
+.lb-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  border-radius: var(--radius);
+  transition: all 0.3s;
+  animation: slideIn 0.4s ease-out both;
+  gap: 12px;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+.lb-row.eliminated { opacity: 0.35; filter: grayscale(0.8); border-color: rgba(255,23,68,0.15); }
+.lb-row.my-team { background: rgba(0,229,255,0.06); border-color: rgba(0,229,255,0.3); }
+.lb-rank {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.2rem;
+  width: 32px;
+  text-align: center;
+}
+.rank-1 .lb-rank { color: var(--gold); }
+.rank-2 .lb-rank { color: var(--silver); }
+.rank-3 .lb-rank { color: var(--bronze); }
+.lb-team { flex: 1; font-weight: 600; }
+.lb-stat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.lb-score {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.3rem;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.tag-elim { color: var(--red); background: rgba(255,23,68,0.1); border: 1px solid rgba(255,23,68,0.25); }
+.tag-adv { color: var(--green); background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.25); }
+.tag-pw { color: var(--purple); background: rgba(213,0,249,0.1); border: 1px solid rgba(213,0,249,0.25); }
+
+/* insights bar */
+.insight-row {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.insight-chip {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  flex: 1;
+  min-width: 130px;
+}
+.insight-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.insight-val {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* ═══════════════════ ELIMINATED SCREEN ═══════════════════ */
+#eliminated-screen { text-align: center; gap: 20px; }
+.elim-icon { font-size: 6rem; animation: shake 0.6s ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px) rotate(-5deg); }
+  40% { transform: translateX(10px) rotate(5deg); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+}
+.elim-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 4rem;
+  letter-spacing: 0.1em;
+  color: var(--red);
+  text-shadow: 0 0 40px rgba(255,23,68,0.4);
+}
+.elim-sub { color: var(--muted); font-size: 1.1rem; }
+.survived-msg {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 2.5rem;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  text-shadow: 0 0 30px rgba(0,230,118,0.4);
+}
+
+/* ═══════════════════ PODIUM ═══════════════════ */
+#podium-screen { align-items: center; gap: 24px; }
+.podium-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 3.5rem;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, var(--gold), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.podium-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  justify-content: center;
+  margin: 20px 0;
+}
+.podium-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.podium-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 100px;
+}
+.podium-score {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.4rem;
+  letter-spacing: 0.05em;
+}
+.podium-stand {
+  width: 110px;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 2.5rem;
+}
+.p1 .podium-stand { height: 130px; background: linear-gradient(180deg, var(--gold), #c7a100); color: var(--bg); }
+.p2 .podium-stand { height: 100px; background: linear-gradient(180deg, var(--silver), #9e9e9e); color: var(--bg); }
+.p3 .podium-stand { height: 75px; background: linear-gradient(180deg, var(--bronze), #e65100); color: var(--bg); }
+.podium-list { width: 100%; max-width: 560px; }
+
+/* ═══════════════════ OPERATOR SCREEN ═══════════════════ */
+#operator-screen { background: #020610; padding: 0; align-items: stretch; justify-content: flex-start; min-height: 100vh; }
+.op-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(2,6,16,0.97);
+  border-bottom: 2px solid var(--accent2);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  backdrop-filter: blur(12px);
+}
+.op-logo {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.2rem;
+  letter-spacing: 0.15em;
+  color: var(--accent2);
+}
+.op-sep { width: 1px; height: 20px; background: var(--border2); }
+.op-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; flex: 1; }
+.op-right { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+
+/* Operator main layout */
+.op-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 0;
+  min-height: calc(100vh - 60px);
+}
+.op-main-col {
+  padding: 24px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+}
+.op-sidebar {
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Big question display for projector */
+.op-question-panel {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 40px;
+  text-align: center;
+  box-shadow: var(--glow), 0 0 80px rgba(0,229,255,0.06);
+  margin-bottom: 20px;
+}
+.op-rl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent2);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.op-qnum {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  margin-bottom: 24px;
+}
+.op-case-info {
+  background: rgba(255,87,34,0.07);
+  border: 1px solid rgba(255,87,34,0.2);
+  border-left: 3px solid var(--accent2);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent2);
+  margin-bottom: 20px;
+  text-align: left;
+  display: none;
+}
+.op-qtext {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 36px;
+}
+.op-opts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.op-option {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: left;
+  transition: all 0.3s;
+}
+.op-option.revealed {
+  border-color: var(--green);
+  background: rgba(0,230,118,0.08);
+  color: var(--green);
+  box-shadow: var(--glow-g);
+}
+.op-opt-letter {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-right: 10px;
+}
+
+/* Op timer */
+.op-timer-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-bottom: 16px; }
+.op-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 3px;
+  transition: width 1s linear, background 0.5s;
+}
+.op-timer-fill.warn { background: linear-gradient(90deg, #ffab40, var(--accent2)); }
+.op-timer-fill.danger { background: var(--red); }
+.op-big-timer {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 6rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+  transition: color 0.5s;
+  line-height: 1;
+}
+.op-big-timer.normal { color: var(--accent); }
+.op-big-timer.warn { color: #ffab40; }
+.op-big-timer.danger { color: var(--red); animation: timerPulse 0.4s ease-in-out infinite; }
+
+/* Op leaderboard sidebar */
+.op-lb-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 12px;
+  text-align: center;
+}
+.op-lb-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.op-lb-team {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+.op-lb-team.eliminated { opacity: 0.3; filter: grayscale(1); }
+.op-lb-team-rank { font-family: 'Bebas Neue', cursive; font-size: 0.9rem; width: 24px; color: var(--muted); text-align: center; }
+.op-lb-team-name { flex: 1; font-weight: 600; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.op-lb-team-score { font-family: 'Bebas Neue', cursive; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.05em; }
+.op-lb-team-acc { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+
+/* Op results panel */
+.op-lb-panel { display: none; }
+.op-res-title { font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 0.1em; color: var(--accent); text-align: center; margin-bottom: 6px; }
+.op-res-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 20px; }
+.op-lb-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* ═══════════════════ ELIMINATION PANEL ═══════════════════ */
+.elim-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
+}
+.elim-panel-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  color: var(--accent2);
+  margin-bottom: 14px;
+}
+.elim-team-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.elim-team-row:last-child { border-bottom: none; }
+.elim-checkbox {
+  width: 16px; height: 16px;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+.cutoff-line {
+  border: none;
+  border-top: 2px dashed rgba(255,23,68,0.4);
+  margin: 8px 0;
+  position: relative;
+}
+.cutoff-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--red);
+  letter-spacing: 0.1em;
+  text-align: center;
+  margin: 6px 0;
+  opacity: 0.7;
+}
+
+/* ═══════════════════ SCORE OVERRIDE PANEL ═══════════════════ */
+.score-override {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 12px;
+}
+.score-override-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+.score-row-name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-input {
+  width: 64px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 4px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+/* ═══════════════════ POWER-UPS ═══════════════════ */
+.powerup-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.powerup-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+}
+.powerup-btn:hover { border-color: var(--purple); color: var(--purple); }
+.powerup-btn.used { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
+.powerup-btn.active { background: rgba(213,0,249,0.15); border-color: var(--purple); color: var(--purple); }
+
+/* ═══════════════════ ANALYTICS ═══════════════════ */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.analytics-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.analytics-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.analytics-value {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.8rem;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+.analytics-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+/* ═══════════════════ SETUP PANEL ═══════════════════ */
+#setup-screen { align-items: center; }
+.setup-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+  width: 100%;
+  max-width: 700px;
+}
+.setup-tab {
+  padding: 10px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  transition: all var(--transition);
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.setup-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.setup-tab-content { display: none; width: 100%; max-width: 700px; }
+.setup-tab-content.active { display: block; }
+
+/* ═══════════════════ ROUND TRANSITION ═══════════════════ */
+#round-transition {
+  position: fixed; inset: 0; z-index: 800;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+#round-transition.active { opacity: 1; pointer-events: all; }
+.rt-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent2);
+  letter-spacing: 0.5em;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+.rt-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rtSlide 0.5s ease-out;
+}
+@keyframes rtSlide { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.rt-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 24px;
+}
+.rt-bars {
+  display: flex;
+  gap: 4px;
+  margin-top: 40px;
+}
+.rt-bar {
+  width: 6px;
+  height: 40px;
+  background: var(--accent);
+  border-radius: 3px;
+  animation: rtBarBounce 0.6s ease-in-out infinite alternate;
+}
+.rt-bar:nth-child(2) { animation-delay: 0.1s; background: var(--accent2); }
+.rt-bar:nth-child(3) { animation-delay: 0.2s; }
+.rt-bar:nth-child(4) { animation-delay: 0.3s; background: var(--accent2); }
+.rt-bar:nth-child(5) { animation-delay: 0.4s; }
+@keyframes rtBarBounce { from { height: 20px; opacity: 0.5; } to { height: 60px; opacity: 1; } }
+
+/* ═══════════════════ TOAST ═══════════════════ */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  z-index: 9999;
+  box-shadow: var(--glow);
+  animation: toastIn 0.3s ease;
+  white-space: nowrap;
+}
+.toast.error { border-color: var(--red); }
+.toast.success { border-color: var(--green); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* ═══════════════════ ANSWER OVERLAY (OPERATOR) ═══════════════════ */
+.answer-overlay {
+  position: fixed; inset: 0; z-index: 700;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
+.answer-box {
+  background: var(--surface);
+  border: 2px solid var(--green);
+  border-radius: var(--radius);
+  padding: 48px 72px;
+  text-align: center;
+  box-shadow: var(--glow-g);
+  animation: slideUp 0.3s ease;
+}
+.answer-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.answer-value {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 3rem;
+  letter-spacing: 0.05em;
+  color: var(--green);
+}
+.answer-difficulty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+/* ═══════════════════ RESPONSIVE ═══════════════════ */
+@media (max-width: 768px) {
+  .op-layout { grid-template-columns: 1fr; }
+  .op-sidebar { border-right: none; border-top: 1px solid var(--border); }
+  .options-grid { grid-template-columns: 1fr; }
+  .op-opts { grid-template-columns: 1fr; }
+  .op-big-timer { font-size: 4rem; }
+  .op-qtext { font-size: 1.4rem; }
+  .analytics-grid { grid-template-columns: 1fr 1fr; }
+  .podium-stand { width: 80px; }
+  .p1 .podium-stand { height: 100px; }
+  .p2 .podium-stand { height: 75px; }
+  .p3 .podium-stand { height: 55px; }
+}
+@media (max-width: 480px) {
+  .op-layout { grid-template-columns: 1fr; }
+  .landing-btns { flex-direction: column; align-items: center; }
+  .analytics-grid { grid-template-columns: 1fr; }
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+/* Misc */
+.sep { width: 100%; height: 1px; background: var(--border); margin: 16px 0; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.text-accent { color: var(--accent); }
+.text-muted { color: var(--muted); }
+.mono { font-family: 'JetBrains Mono', monospace; }
+.hidden { display: none !important; }
+
+/* Section label */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Buzzer round */
+.buzzer-btn {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.8rem;
+  letter-spacing: 0.1em;
+  border: 4px solid var(--accent2);
+  background: radial-gradient(circle at 40% 35%, rgba(255,87,34,0.25), rgba(255,87,34,0.05));
+  color: var(--text);
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 0 40px rgba(255,87,34,0.2);
+  animation: buzzerPulse 2s ease-in-out infinite;
+  margin: 20px auto;
+  display: block;
+}
+.buzzer-btn:hover:not(:disabled) {
+  transform: scale(1.08);
+  box-shadow: 0 0 60px rgba(255,87,34,0.5);
+  background: radial-gradient(circle at 40% 35%, rgba(255,87,34,0.4), rgba(255,87,34,0.1));
+}
+.buzzer-btn:disabled { opacity: 0.4; cursor: not-allowed; animation: none; }
+@keyframes buzzerPulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(255,87,34,0.2); }
+  50% { box-shadow: 0 0 60px rgba(255,87,34,0.4); }
+}
+
+/* 50-50 overlay */
+.option-btn.hidden-powerup {
+  opacity: 0.2;
+  pointer-events: none;
+  background: var(--surface2);
+}
+
+/* Confirmed answer glow */
+.answered-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 10px 16px;
+  background: rgba(0,229,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.answered-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: netPulse 1.5s infinite; }
+
+/* Waiting for question */
+.waiting-for-q {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 40px;
+  letter-spacing: 0.1em;
+}
+
+/* Question difficulty indicator */
+.diff-bar-wrap { margin-top: 8px; }
+.diff-bar { height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.diff-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+/* Accuracy chart */
+.acc-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.acc-bar-label { width: 90px; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-bar-track { flex: 1; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.acc-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 0.8s ease; }
+.acc-bar-val { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); width: 40px; text-align: right; }
+
+/* Op connection counter */
+.connection-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--green);
+  background: rgba(0,230,118,0.1);
+  border: 1px solid rgba(0,230,118,0.25);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Power-up granted popup */
+.powerup-granted {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: var(--surface);
+  border: 1px solid var(--purple);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  z-index: 800;
+  box-shadow: 0 0 30px rgba(213,0,249,0.2);
+  animation: slideInRight 0.4s ease, fadeOut 0.4s 2.6s ease forwards;
+  font-size: 0.85rem;
+  max-width: 240px;
+}
+@keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { to { opacity: 0; } }
+
+/* Correct answer with difficulty stat */
+.q-stat-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.q-stat-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px 10px;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="bg-layer bg-grid"></div>
+<div class="bg-layer bg-glow-layer"></div>
+
+<!-- Persistent UI -->
+<button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+<div class="network-status" id="net-status">
+  <div class="net-dot" id="net-dot"></div>
+  <span id="net-text">LIVE</span>
+</div>
+
+<!-- Round Transition Overlay -->
+<div id="round-transition">
+  <div class="rt-label">⚡ INITIATING</div>
+  <div class="rt-title" id="rt-title">ROUND 1</div>
+  <div class="rt-sub" id="rt-sub">General Awareness · +1 per correct</div>
+  <div class="rt-bars">
+    <div class="rt-bar"></div><div class="rt-bar"></div><div class="rt-bar"></div>
+    <div class="rt-bar"></div><div class="rt-bar"></div>
+  </div>
+</div>
+
+<!-- ════════════ LANDING ════════════ -->
+<div class="screen active" id="landing">
+  <div class="logo">Analytics<br>Arena</div>
+  <div class="logo-tagline">Business Analytics Club · Elite Quiz Platform</div>
+  <div class="landing-btns">
+    <button class="btn btn-primary btn-lg" onclick="showScreen('student-login')">▶ Student Portal</button>
+    <button class="btn btn-operator btn-lg" onclick="showScreen('operator-login')">⚙ Operator Panel</button>
+    <button class="btn btn-ghost btn-lg" onclick="showScreen('setup-screen'); checkOperatorForSetup()">⚙ Setup Quiz</button>
+  </div>
+  <div class="qr-section" id="qr-section">
+    <div class="qr-box">
+      <div class="qr-label">Student Access</div>
+      <div class="qr-canvas" id="qr-student" style="width:120px;height:120px;margin:0 auto 10px;"></div>
+      <div class="qr-url" id="url-student">—</div>
+    </div>
+    <div class="qr-box">
+      <div class="qr-label">Operator Panel</div>
+      <div class="qr-canvas" id="qr-operator" style="width:120px;height:120px;margin:0 auto 10px;"></div>
+      <div class="qr-url" id="url-operator">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ STUDENT LOGIN ════════════ -->
+<div class="screen" id="student-login">
+  <div class="card">
+    <div class="card-title">▸ Student Portal</div>
+    <div class="input-group">
+      <label>Your Name</label>
+      <input type="text" id="student-name" placeholder="Enter your name" autocomplete="off" />
+    </div>
+    <div class="input-group">
+      <label>Select Team</label>
+      <select id="team-select">
+        <option value="">— Choose Team —</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px;">
+      <button class="btn btn-primary" style="flex:1" onclick="studentLogin()">JOIN QUIZ</button>
+      <button class="btn btn-ghost" onclick="showScreen('landing')">← Back</button>
+    </div>
+    <div id="login-error" class="hidden" style="color:var(--red);font-family:'JetBrains Mono';font-size:0.8rem;margin-top:10px;padding:8px;background:rgba(255,23,68,0.06);border:1px solid rgba(255,23,68,0.2);border-radius:4px;"></div>
+  </div>
+</div>
+
+<!-- ════════════ OPERATOR LOGIN ════════════ -->
+<div class="screen" id="operator-login">
+  <div class="card">
+    <div class="card-title">⚙ Operator Access</div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="op-password" placeholder="Enter operator password"
+        onkeydown="if(event.key==='Enter')operatorLogin()" />
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px;">
+      <button class="btn btn-operator" style="flex:1" onclick="operatorLogin()">ENTER</button>
+      <button class="btn btn-ghost" onclick="showScreen('landing')">← Back</button>
+    </div>
+    <div id="op-login-error" class="hidden" style="color:var(--red);font-size:0.8rem;margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ════════════ WAITING ════════════ -->
+<div class="screen" id="waiting-screen">
+  <div class="waiting-orb"></div>
+  <div class="waiting-title">Arena Loading</div>
+  <div class="waiting-sub">Waiting for operator to start<span class="dots"></span></div>
+  <div class="waiting-team" id="waiting-team-display">—</div>
+  <div id="waiting-mini-lb" style="width:100%;max-width:400px;margin-top:20px;"></div>
+</div>
+
+<!-- ════════════ QUIZ (STUDENT) ════════════ -->
+<div class="screen" id="quiz-screen" style="padding:0;background:var(--bg);justify-content:flex-start;">
+  <header class="quiz-header">
+    <span class="hdr-badge hdr-round" id="hdr-round">ROUND 1</span>
+    <span class="hdr-badge hdr-team" id="hdr-team">—</span>
+    <span class="hdr-score-chip" id="hdr-score">0 pts</span>
+    <span class="hdr-rank-chip hidden" id="hdr-rank"></span>
+    <span class="hdr-rank-chip hidden" id="hdr-gap" style="color:var(--muted);font-size:0.65rem;"></span>
+    <span class="hdr-q" id="hdr-q">Q 1/15</span>
+  </header>
+
+  <div class="timer-wrap">
+    <svg class="timer-ring-svg" viewBox="0 0 150 150">
+      <circle class="timer-circle-bg" cx="75" cy="75" r="65"/>
+      <circle class="timer-circle-fg" id="timer-ring" cx="75" cy="75" r="65"/>
+    </svg>
+    <div class="timer-number" id="timer-num">30</div>
+    <div class="timer-label">Seconds</div>
+  </div>
+
+  <div class="question-area">
+    <div class="case-banner hidden" id="case-banner">—</div>
+    <div class="q-number-row">
+      <span class="q-num-badge" id="q-num-badge">Q 1</span>
+      <span class="q-difficulty" id="q-diff-label"></span>
+    </div>
+    <div class="q-text" id="q-text">Waiting for question<span class="dots"></span></div>
+
+    <div class="options-grid" id="options-grid">
+      <button class="option-btn" id="opt-0" onclick="selectOption(0)"><span class="opt-letter">A.</span><span id="opt-text-0">—</span></button>
+      <button class="option-btn" id="opt-1" onclick="selectOption(1)"><span class="opt-letter">B.</span><span id="opt-text-1">—</span></button>
+      <button class="option-btn" id="opt-2" onclick="selectOption(2)"><span class="opt-letter">C.</span><span id="opt-text-2">—</span></button>
+      <button class="option-btn" id="opt-3" onclick="selectOption(3)"><span class="opt-letter">D.</span><span id="opt-text-3">—</span></button>
+    </div>
+
+    <div id="answered-notice" class="hidden answered-notice">
+      <div class="answered-dot"></div>
+      Answer locked — waiting for round to end<span class="dots"></span>
+    </div>
+
+    <!-- Power-ups for students -->
+    <div id="student-powerups" class="hidden" style="margin-top:16px;">
+      <div class="section-label">Power-ups</div>
+      <div class="powerup-row" id="powerup-row"></div>
+    </div>
+
+    <!-- Mini leaderboard -->
+    <div class="mini-lb hidden" id="quiz-mini-lb">
+      <div class="mini-lb-title">📊 Live Rankings</div>
+      <div id="mini-lb-rows"></div>
+    </div>
+
+    <div id="q-stats-wrap" class="hidden q-stat-row" style="justify-content:flex-start;margin-top:12px;"></div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- ════════════ RESULTS ════════════ -->
+<div class="screen" id="results-screen">
+  <div class="results-card">
+    <div class="results-header">
+      <div class="results-title" id="results-title">ROUND RESULTS</div>
+      <div class="results-subtitle" id="results-subtitle">—</div>
+    </div>
+    <div class="leaderboard" id="leaderboard-list"></div>
+    <div class="insight-row" id="insight-row"></div>
+    <div style="padding:16px;border-top:1px solid var(--border);" id="results-actions"></div>
+  </div>
+</div>
+
+<!-- ════════════ ELIMINATED ════════════ -->
+<div class="screen" id="eliminated-screen">
+  <div class="elim-icon">💀</div>
+  <div class="elim-title">ELIMINATED</div>
+  <div class="elim-sub">Your team has been knocked out of the competition.</div>
+  <div style="margin-top:20px;">
+    <button class="btn btn-ghost" onclick="showScreen('results-screen');renderLeaderboard()">View Final Rankings</button>
+  </div>
+</div>
+
+<!-- ════════════ SURVIVED ════════════ -->
+<div class="screen" id="survived-screen">
+  <div style="font-size:5rem;">🎉</div>
+  <div class="survived-msg">YOU SURVIVED!</div>
+  <div style="color:var(--muted);margin-top:12px;" id="survived-msg-sub">Your team advances to the next round</div>
+  <div id="survived-mini-lb" style="width:100%;max-width:400px;margin-top:20px;"></div>
+</div>
+
+<!-- ════════════ PODIUM ════════════ -->
+<div class="screen" id="podium-screen" style="gap:20px;">
+  <div class="podium-title">🏆 Final Rankings</div>
+  <div class="podium-wrap" id="podium-visual"></div>
+  <div class="podium-list" id="podium-list"></div>
+  <div class="insight-row" id="podium-insights"></div>
+  <button class="btn btn-ghost btn-sm" onclick="showScreen('landing')" style="margin-top:8px;">← Back to Home</button>
+</div>
+
+<!-- ════════════ OPERATOR SCREEN ════════════ -->
+<div class="screen" id="operator-screen">
+  <!-- Header -->
+  <header class="op-header">
+    <div class="op-logo">⚙ Analytics Arena — Operator</div>
+    <div class="op-sep"></div>
+    <div class="op-controls">
+      <button class="btn btn-primary btn-sm" id="btn-next" onclick="operatorNext()">▶ Next Q</button>
+      <button class="btn btn-ghost btn-sm" id="btn-pause" onclick="operatorTogglePause()">⏸ Pause</button>
+      <button class="btn btn-ghost btn-sm" onclick="operatorSkip()">⏭ Skip</button>
+      <button class="btn btn-success btn-sm" onclick="operatorReveal()">✓ Reveal</button>
+      <button class="btn btn-warning btn-sm" onclick="operatorEndRound()">⏹ End Round</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmReset()">↺ Reset</button>
+      <span class="op-sep"></span>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('setup-screen')">⚙ Setup</button>
+    </div>
+    <div class="op-right">
+      <div class="connection-badge">
+        <div class="net-dot"></div>
+        <span id="op-answers-count">0 answered</span>
+      </div>
+      <span id="op-round-badge" style="font-family:'JetBrains Mono';font-size:0.75rem;color:var(--accent2);padding:4px 10px;background:rgba(255,87,34,0.1);border:1px solid rgba(255,87,34,0.25);border-radius:4px;">R—</span>
+      <span id="op-q-badge" style="font-family:'JetBrains Mono';font-size:0.75rem;color:var(--muted);">Ready</span>
+    </div>
+  </header>
+
+  <div class="op-layout" style="width:100%;">
+    <!-- Main column -->
+    <div class="op-main-col">
+
+      <!-- Question Panel -->
+      <div id="op-question-panel" class="op-question-panel">
+        <div class="op-rl" id="op-rl">ROUND 1 · GENERAL AWARENESS</div>
+        <div class="op-qnum" id="op-qnum">Question 0 of 0</div>
+        <div class="op-case-info" id="op-case-info"></div>
+        <div class="op-timer-bar">
+          <div class="op-timer-fill normal" id="op-timer-fill" style="width:100%"></div>
+        </div>
+        <div class="op-big-timer normal" id="op-big-timer">—</div>
+        <div class="op-qtext" id="op-qtext">Press "Next Q" to begin the quiz.</div>
+        <div class="op-opts" id="op-opts">
+          <div class="op-option" id="op-opt-0"><span class="op-opt-letter">A.</span><span>—</span></div>
+          <div class="op-option" id="op-opt-1"><span class="op-opt-letter">B.</span><span>—</span></div>
+          <div class="op-option" id="op-opt-2"><span class="op-opt-letter">C.</span><span>—</span></div>
+          <div class="op-option" id="op-opt-3"><span class="op-opt-letter">D.</span><span>—</span></div>
+        </div>
+
+        <!-- Live response bar -->
+        <div style="margin-top:12px;">
+          <div class="section-label">Response Distribution</div>
+          <div id="response-dist" style="display:flex;gap:8px;margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Results Panel (after end round) -->
+      <div id="op-lb-panel" class="op-lb-panel">
+        <div class="op-res-title" id="op-res-title">ROUND RESULTS</div>
+        <div class="op-res-sub" id="op-res-sub">—</div>
+
+        <!-- Round insights -->
+        <div class="analytics-grid" id="op-round-insights" style="margin-bottom:16px;"></div>
+
+        <div id="op-lb-list"></div>
+
+        <!-- Elimination Panel -->
+        <div class="elim-panel" id="elim-panel">
+          <div class="elim-panel-title">⚠ Elimination Control</div>
+          <div id="elim-team-list"></div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+            <button class="btn btn-danger btn-sm" onclick="finalizeEliminations()">Confirm Eliminations</button>
+            <button class="btn btn-ghost btn-sm" onclick="operatorNextRound()">Next Round →</button>
+          </div>
+        </div>
+
+        <!-- Analytics section -->
+        <div style="margin-top:16px;">
+          <div class="section-label">Accuracy by Team</div>
+          <div id="acc-bars-wrap" style="margin-top:10px;"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="op-sidebar">
+      <div class="op-lb-title">📊 Live Leaderboard</div>
+      <div class="op-lb-grid" id="op-lb-grid"></div>
+
+      <div class="sep"></div>
+
+      <!-- Score override -->
+      <div class="score-override">
+        <div class="score-override-title">Score Override</div>
+        <div id="score-override-rows"></div>
+        <button class="btn btn-warning btn-sm" style="margin-top:10px;width:100%;" onclick="applyScoreOverrides()">Apply Overrides</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- Bonus mode -->
+      <div style="margin-bottom:12px;">
+        <div class="section-label">Bonus Points</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+          <select id="bonus-team-sel" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px;font-family:'JetBrains Mono';font-size:0.75rem;border-radius:4px;"></select>
+          <input type="number" id="bonus-amount" placeholder="+5" style="width:64px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px;text-align:center;font-family:'JetBrains Mono';font-size:0.8rem;border-radius:4px;" value="5"/>
+          <button class="btn btn-success btn-xs" onclick="applyBonus()">+pts</button>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- Power-up assignment -->
+      <div>
+        <div class="section-label">Assign Power-Up</div>
+        <div style="display:flex;gap:6px;flex-direction:column;margin-top:8px;">
+          <select id="pu-team-sel" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px;font-family:'JetBrains Mono';font-size:0.75rem;border-radius:4px;"></select>
+          <div style="display:flex;gap:6px;">
+            <select id="pu-type-sel" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px;font-family:'JetBrains Mono';font-size:0.72rem;border-radius:4px;">
+              <option value="double">Double Score</option>
+              <option value="skip">Skip Question</option>
+              <option value="fifty">50-50</option>
+            </select>
+            <button class="btn btn-purple btn-xs" onclick="assignPowerup()">Give</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SETUP SCREEN ════════════ -->
+<div class="screen" id="setup-screen" style="align-items:flex-start;padding-top:60px;">
+  <div style="width:100%;max-width:750px;margin:0 auto;padding:0 20px 40px;">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <div style="font-family:'Bebas Neue';font-size:2rem;letter-spacing:0.1em;color:var(--accent);">⚙ Setup Panel</div>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('landing')">← Back</button>
+    </div>
+
+    <div class="setup-tabs">
+      <button class="setup-tab active" onclick="switchSetupTab('tab-teams',this)">Teams</button>
+      <button class="setup-tab" onclick="switchSetupTab('tab-questions',this)">Questions</button>
+      <button class="setup-tab" onclick="switchSetupTab('tab-rounds',this)">Rounds</button>
+      <button class="setup-tab" onclick="switchSetupTab('tab-export',this)">Export</button>
+    </div>
+
+    <!-- Teams tab -->
+    <div class="setup-tab-content active" id="tab-teams">
+      <div class="card card-wide" style="max-width:100%;">
+        <div class="card-title" style="font-size:1.1rem;">Configure Teams</div>
+        <div class="input-group">
+          <label>Number of Teams</label>
+          <input type="number" id="num-teams-input" min="2" max="20" value="10" onchange="generateTeamNameInputs()" />
+        </div>
+        <div id="team-name-inputs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;"></div>
+        <button class="btn btn-primary btn-sm" onclick="applyTeamConfig()">Apply Team Config</button>
+      </div>
+    </div>
+
+    <!-- Questions tab -->
+    <div class="setup-tab-content" id="tab-questions">
+      <div class="card card-wide" style="max-width:100%;">
+        <div class="card-title" style="font-size:1.1rem;">Upload Questions</div>
+        <div style="font-family:'JetBrains Mono';font-size:0.75rem;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+          Upload JSON with format:<br>
+          <code style="color:var(--accent);">[{"r":1,"q":"Question?","opts":["A","B","C","D"],"ans":0,"case":"Optional case text"}]</code>
+        </div>
+        <div class="input-group">
+          <label>JSON File Upload</label>
+          <input type="file" id="q-file-upload" accept=".json" onchange="loadQuestionsFromFile(event)" style="cursor:pointer;" />
+        </div>
+        <div class="sep"></div>
+        <div class="input-group">
+          <label>Paste JSON directly</label>
+          <textarea id="q-json-paste" placeholder='[{"r":1,"q":"...","opts":["A","B","C","D"],"ans":0}]' style="font-size:0.75rem;"></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="loadQuestionsFromPaste()">Load Questions</button>
+        <div id="q-load-status" style="font-family:'JetBrains Mono';font-size:0.75rem;margin-top:12px;color:var(--green);"></div>
+      </div>
+    </div>
+
+    <!-- Rounds tab -->
+    <div class="setup-tab-content" id="tab-rounds">
+      <div class="card card-wide" style="max-width:100%;">
+        <div class="card-title" style="font-size:1.1rem;">Round Configuration</div>
+        <div id="round-config-rows"></div>
+        <div style="margin-top:16px;">
+          <div class="input-group">
+            <label>Negative Marking Toggle</label>
+            <select id="neg-marking-sel">
+              <option value="none">No Negative Marking</option>
+              <option value="round3">Round 3 Only (−1 for wrong)</option>
+              <option value="all">All Rounds (−1 for wrong)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Eliminations After Round</label>
+            <select id="elim-config-sel">
+              <option value="standard">Standard (2 after R1,R2,R3)</option>
+              <option value="aggressive">Aggressive (3 after R1,R2,R3)</option>
+              <option value="none">No Eliminations</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="applyRoundConfig()">Save Round Config</button>
+      </div>
+    </div>
+
+    <!-- Export tab -->
+    <div class="setup-tab-content" id="tab-export">
+      <div class="card card-wide" style="max-width:100%;">
+        <div class="card-title" style="font-size:1.1rem;">Export & Session</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button class="btn btn-primary btn-sm" onclick="exportResults()">Export Results (JSON)</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export Scores (CSV)</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmReset()">Reset Quiz State</button>
+        </div>
+        <div class="sep"></div>
+        <div style="font-family:'JetBrains Mono';font-size:0.75rem;color:var(--muted);">
+          Session recovery: Students can refresh their page and rejoin their team to continue.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIGURATION
+// ═══════════════════════════════════════════════════════════
+const OP_PASSWORD = "arena2024";
+const STORE_KEY   = 'analytics_arena_v6';
+
+let QUESTIONS = [
+  // ROUND 1 — General Awareness — 20s — +1
+  { r:1, q:"Which financial statement shows a company's profitability over a period?", opts:["Balance Sheet","Income Statement","Cash Flow Statement","Statement of Equity"], ans:1 },
+  { r:1, q:"What does GDP stand for?", opts:["General Domestic Product","Gross Domestic Product","Gross Development Plan","Global Demand Price"], ans:1 },
+  { r:1, q:"Which of the following is NOT a factor of production?", opts:["Land","Labor","Capital","Currency"], ans:3 },
+  { r:1, q:"SWOT stands for Strengths, Weaknesses, _____ and Threats.", opts:["Options","Opportunities","Operations","Observations"], ans:1 },
+  { r:1, q:"What is the primary goal of financial management?", opts:["Maximize Revenue","Minimize Cost","Maximize Shareholder Wealth","Increase Market Share"], ans:2 },
+  { r:1, q:"Which ratio measures a company's ability to pay short-term obligations?", opts:["Debt Ratio","Current Ratio","Profit Margin","P/E Ratio"], ans:1 },
+  { r:1, q:"'Break-even point' is where:", opts:["Revenue = Expenses","Profit is maximum","Revenue > Costs","Loss is minimum"], ans:0 },
+  { r:1, q:"What is 'Working Capital'?", opts:["Fixed Assets − Liabilities","Current Assets − Current Liabilities","Total Assets − Total Equity","Revenue − Expenses"], ans:1 },
+  { r:1, q:"Which of these is a primary market activity?", opts:["Trading existing stocks","IPO (Initial Public Offering)","Buying bonds on exchange","Short selling"], ans:1 },
+  { r:1, q:"The 4 Ps of Marketing include all EXCEPT:", opts:["Price","Place","Profit","Promotion"], ans:2 },
+  { r:1, q:"What is 'Depreciation'?", opts:["Increase in asset value","Tax deduction for businesses","Reduction in asset value over time","Loan interest expense"], ans:2 },
+  { r:1, q:"Which document outlines a company's long-term objectives?", opts:["Balance Sheet","Mission Statement","Income Statement","Bank Statement"], ans:1 },
+  { r:1, q:"What does ROI stand for?", opts:["Return On Investment","Rate Of Inflation","Risk Of Insolvency","Revenue Over Income"], ans:0 },
+  { r:1, q:"Porter's Five Forces does NOT include:", opts:["Buyer Power","Supplier Power","Regulatory Power","Threat of Substitutes"], ans:2 },
+  { r:1, q:"'Market Capitalization' is calculated as:", opts:["Revenue × P/E","Share Price × Total Shares","Assets − Liabilities","Net Profit × 12"], ans:1 },
+
+  // ROUND 2 — Mixed Application — 20s — +1
+  { r:2, q:"A company has Assets of ₹5,00,000 and Liabilities of ₹2,00,000. What is Equity?", opts:["₹2,00,000","₹3,00,000","₹5,00,000","₹7,00,000"], ans:1 },
+  { r:2, q:"Price Elasticity of Demand >1 means demand is:", opts:["Inelastic","Elastic","Unit elastic","Perfectly inelastic"], ans:1 },
+  { r:2, q:"BCG Matrix categorizes products into:", opts:["4 quadrants","3 segments","5 stages","2 tiers"], ans:0 },
+  { r:2, q:"Which analysis separates fixed and variable costs to find break-even?", opts:["SWOT","CVP (Cost-Volume-Profit)","PESTLE","Ratio Analysis"], ans:1 },
+  { r:2, q:"What is 'Gross Profit Margin'?", opts:["Net Profit / Revenue","(Revenue − COGS) / Revenue","Operating Profit / Assets","EBIT / Revenue"], ans:1 },
+  { r:2, q:"Which marketing concept focuses on customer needs over product features?", opts:["Selling Concept","Product Concept","Marketing Concept","Production Concept"], ans:2 },
+  { r:2, q:"A 'Bull Market' is characterized by:", opts:["Falling prices","Rising prices","Stable prices","High volatility"], ans:1 },
+  { r:2, q:"What does 'P/E Ratio' indicate?", opts:["Profit per employee","Price relative to earnings","Production efficiency","Performance evaluation"], ans:1 },
+  { r:2, q:"Supply chain management primarily focuses on:", opts:["Marketing campaigns","Flow of goods and services","Employee training","Financial reporting"], ans:1 },
+  { r:2, q:"Herzberg's Two-Factor Theory distinguishes between:", opts:["Income and expenses","Motivators and hygiene factors","Fixed and variable costs","Supply and demand"], ans:1 },
+  { r:2, q:"Which pricing strategy sets a high initial price then lowers it?", opts:["Penetration Pricing","Competitive Pricing","Price Skimming","Cost-plus Pricing"], ans:2 },
+  { r:2, q:"'Accounts Receivable' represents:", opts:["Money owed to suppliers","Money owed by customers","Company's cash reserves","Long-term investments"], ans:1 },
+  { r:2, q:"Which is a qualitative research method?", opts:["Survey with ratings","Focus groups","Statistical regression","Sales data analysis"], ans:1 },
+  { r:2, q:"The Ansoff Matrix includes market penetration, market development, product development, and:", opts:["Market Research","Diversification","Brand Building","Outsourcing"], ans:1 },
+  { r:2, q:"EBITDA stands for Earnings Before Interest, Taxes, Depreciation and:", opts:["Debt Allocation","Amortization","Asset Adjustment","Auditing"], ans:1 },
+
+  // ROUND 3 — Rapid Fire — 10s — +2 correct / -1 wrong
+  { r:3, q:"Quick! What is CAGR?", opts:["Compound Annual Growth Rate","Current Asset Growth Ratio","Cost And Growth Rate","Customer Acquisition Growth Rate"], ans:0 },
+  { r:3, q:"Fastest answer: Net Profit = Revenue minus?", opts:["Assets","All Expenses","Equity","Liabilities"], ans:1 },
+  { r:3, q:"'Blue chip' stocks are:", opts:["New startups","High-risk speculative","Established, reliable companies","Government bonds"], ans:2 },
+  { r:3, q:"Quick! CRM stands for:", opts:["Cash Ratio Management","Customer Relationship Management","Cost Revenue Model","Corporate Risk Monitoring"], ans:1 },
+  { r:3, q:"Which is a variable cost?", opts:["Rent","Insurance premium","Raw materials","CEO salary"], ans:2 },
+  { r:3, q:"ROE measures profitability relative to:", opts:["Revenue","Total Assets","Shareholders' Equity","Market Cap"], ans:2 },
+  { r:3, q:"Fast! What is 'Liquidity'?", opts:["Profitability","Ability to convert assets to cash","Level of debt","Market share %"], ans:1 },
+  { r:3, q:"A 'Monopoly' means:", opts:["Two sellers in market","One seller dominates market","Free competitive market","Government-controlled pricing"], ans:1 },
+  { r:3, q:"NPS stands for:", opts:["Net Profit Score","Net Promoter Score","National Price Standard","Net Performance Scale"], ans:1 },
+  { r:3, q:"Quick! Accounts Payable is a:", opts:["Current Asset","Long-term Asset","Current Liability","Fixed Cost"], ans:2 },
+  { r:3, q:"Cash, inventory, receivables are examples of?", opts:["Fixed assets","Long-term assets","Current assets","Intangible assets"], ans:2 },
+  { r:3, q:"Measure of financial leverage?", opts:["Net Profit Margin","Current Ratio","Debt-to-Equity Ratio","Gross Margin"], ans:2 },
+  { r:3, q:"A major change in organizational structure is called?", opts:["Recruitment","Transformation","Budgeting","Auditing"], ans:1 },
+  { r:3, q:"Profit % formula?", opts:["Profit/Revenue×100","Profit/Cost×100","Revenue/Cost×100","Cost/Profit×100"], ans:1 },
+  { r:3, q:"Quick! USP stands for?", opts:["Universal Sales Plan","Unique Selling Proposition","Unit Sales Performance","Uniform Strategy Protocol"], ans:1 },
+
+  // ROUND 4 — Case Study — 45s — +2
+  { r:4, case:"CASE 1 — Monthly profit: Jan ₹10,000 | Feb ₹15,000 | Mar ₹25,000", q:"What is the overall trend in company profits?", opts:["Decreasing","Constant","Increasing","Fluctuating randomly"], ans:2 },
+  { r:4, case:"CASE 1 — Monthly profit: Jan ₹10,000 | Feb ₹15,000 | Mar ₹25,000", q:"Percentage growth from February to March?", opts:["33.3%","50%","66.7%","75%"], ans:2 },
+  { r:4, case:"CASE 2 — CAC = ₹500 | LTV = ₹2,000", q:"Is this customer acquisition model sustainable?", opts:["No, LTV too low","Yes, LTV > CAC = profitable","Cannot determine","Only if costs fall"], ans:1 },
+  { r:4, case:"CASE 2 — CAC = ₹500 | LTV = ₹2,000", q:"Ideal LTV:CAC industry benchmark?", opts:["1:1","2:1","3:1","5:1"], ans:2 },
+  { r:4, case:"CASE 3 — Debt = ₹1,00,000 | Equity = ₹50,000", q:"What is the Debt-to-Equity ratio?", opts:["1:2","2:1","1:1","3:1"], ans:1 },
+  { r:4, case:"CASE 3 — Debt = ₹1,00,000 | Equity = ₹50,000", q:"What does this D/E ratio indicate about risk?", opts:["Low risk","Medium risk","High risk","No risk"], ans:2 },
+  { r:4, case:"CASE 4 — Sales: Product A = 500 units | Product B = 300 units", q:"Best performer by volume?", opts:["Product B","Both equal","Product A","Cannot determine"], ans:2 },
+  { r:4, case:"CASE 4 — Sales: Product A = 500 units | Product B = 300 units", q:"Recommended strategic action?", opts:["Discontinue A","Promote Product A more","Increase Product B price","Merge both"], ans:1 },
+  { r:4, case:"CASE 5 — Fixed Cost = ₹20,000 | Variable Cost/unit = ₹10 | Selling Price = ₹20", q:"Contribution per unit?", opts:["₹5","₹8","₹10","₹20"], ans:2 },
+  { r:4, case:"CASE 5 — Fixed Cost = ₹20,000 | Variable Cost/unit = ₹10 | Selling Price = ₹20", q:"Units to reach break-even?", opts:["1000 units","1500 units","2000 units","2500 units"], ans:2 },
+  { r:4, case:"CASE 6 — Output increased significantly, staff count unchanged.", q:"What business metric improved?", opts:["Market Share","Customer Retention","Productivity","Brand Value"], ans:2 },
+  { r:4, case:"CASE 6 — Output increased, staff count unchanged.", q:"Most likely reason for improvement?", opts:["Staff reduction","Automation or Training","Price increase","Market expansion"], ans:1 },
+  { r:4, case:"CASE 7 — Total Market = 10,000 units. Company X: 2,000 → 3,500 units.", q:"Company X's initial market share?", opts:["15%","20%","25%","30%"], ans:1 },
+  { r:4, case:"CASE 7 — Company X: 2,000 → 3,500 units sold.", q:"By what % did Company X's sales grow?", opts:["50%","65%","75%","80%"], ans:2 },
+  { r:4, case:"CASE 8 — A company notices repeat customers increasing month over month.", q:"Which metric is improving?", opts:["Churn Rate","Market Share","Customer Retention","CAC"], ans:2 },
+  { r:4, case:"CASE 8 — Repeat customers increasing month over month.", q:"What happens to CAC as retention improves?", opts:["Increases","Stays same","Decreases","Becomes irrelevant"], ans:2 },
+  { r:4, case:"CASE 9 — Retailer: offline sales declining, online sales sharply rising.", q:"What trend does this represent?", opts:["Market collapse","Supply chain disruption","Digital transformation","Seasonal variation"], ans:2 },
+  { r:4, case:"CASE 9 — Offline declining, online sharply rising.", q:"Recommended strategic move?", opts:["Close all stores","Ignore the trend","Invest in e-commerce","Reduce prices offline"], ans:2 },
+  { r:4, case:"CASE 10 — Company raises price 15%, observes significant drop in demand.", q:"Type of demand?", opts:["Inelastic demand","Perfectly inelastic","Elastic demand","Unit elastic"], ans:2 },
+  { r:4, case:"CASE 10 — Price up 15%, demand dropped significantly.", q:"What should the company do?", opts:["Keep prices high","Adjust pricing strategy","Increase advertising only","Exit the market"], ans:1 },
+];
+
+let ROUND_INFO = {
+  1: { name:"ROUND 1", sub:"General Awareness", qs:15, time:20, scoring:"+1 correct", negMark:false },
+  2: { name:"ROUND 2", sub:"Mixed Application", qs:15, time:20, scoring:"+1 correct", negMark:false },
+  3: { name:"ROUND 3", sub:"Rapid Fire ⚡", qs:15, time:10, scoring:"+2 correct · −1 wrong", negMark:true },
+  4: { name:"ROUND 4", sub:"Case Study Analytics", qs:20, time:45, scoring:"+2 correct", negMark:false },
+};
+
+let ELIM_AFTER = { 1:2, 2:2, 3:2 };
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+function defaultState() {
+  const teamNames = ["Team Alpha","Team Beta","Team Gamma","Team Delta","Team Epsilon","Team Zeta","Team Eta","Team Theta","Team Iota","Team Kappa"];
+  const teams = {};
+  teamNames.forEach(t => {
+    teams[t] = { score:0, eliminated:false, correct:0, wrong:0, total:0, powerups:{ double:1, skip:1, fifty:1 }, fastestQ:-1 };
+  });
+  return {
+    quizRunning: false,
+    currentRound: 0,
+    operatorPhase: 'idle',
+    operatorCurrentQ: -1,
+    timerLeft: 0,
+    timerMax: 0,
+    timerPaused: false,
+    teams,
+    teamAnsweredQ: {},   // "TeamName_qi": answerIndex
+    questionResponses: {}, // qi: [ans0count, ans1count, ans2count, ans3count]
+    fastestTeam: {},    // qi: teamName
+    lastUpdate: 0,
+    pendingElim: [],
+    roundPowerups: {},  // "TeamName": {double:false, skip:false, fifty:false}
+    buzzerRound: false,
+    buzzerWinner: null,
+  };
+}
+
+let state = defaultState();
+let myTeam = '';
+let myName = '';
+let myRole = '';
+let opTimerInterval = null;
+let studentPollInterval = null;
+let lastSeenQ = -1;
+let lastSeenPhase = '';
+let lastSeenTimer = -1;
+let studentTimerInterval = null;
+let activeDouble = false;
+let activeFifty = false;
+let hiddenOpts = [];
+let burstTimeout = null;
+
+// ─── Storage helpers ───
+function saveState() {
+  state.lastUpdate = Date.now();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+}
+function loadState() {
+  try {
+    const s = localStorage.getItem(STORE_KEY);
+    if(s) { const parsed = JSON.parse(s); Object.assign(state, parsed); }
+  } catch(e){}
+}
+function broadcastState() {
+  saveState();
+  try { localStorage.setItem(STORE_KEY+'_ping', Date.now().toString()); } catch(e){}
+}
+
+// ─── Storage event (cross-tab sync) ───
+window.addEventListener('storage', (e) => {
+  if(e.key === STORE_KEY || e.key === STORE_KEY+'_ping') {
+    if(myRole === 'student') {
+      loadState();
+      routeStudentByState();
+    } else if(myRole === 'operator') {
+      loadState();
+      renderOpLeaderboard();
+      updateAnswerCount();
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// ROUTING & SCREENS
+// ═══════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+}
+
+function initUrlRouting() {
+  const base = location.href.split('?')[0];
+  const studentUrl = base + '?mode=student';
+  const operatorUrl = base + '?mode=operator';
+  const su = document.getElementById('url-student');
+  const ou = document.getElementById('url-operator');
+  if(su) su.textContent = studentUrl;
+  if(ou) ou.textContent = operatorUrl;
+  generateQRCode('qr-student', studentUrl);
+  generateQRCode('qr-operator', operatorUrl);
+
+  const mode = new URLSearchParams(location.search).get('mode');
+  if(mode === 'student') showScreen('student-login');
+  else if(mode === 'operator') showScreen('operator-login');
+
+  // Populate team selects
+  refreshTeamSelects();
+}
+
+function refreshTeamSelects() {
+  loadState();
+  const teams = Object.keys(state.teams);
+  const sel = document.getElementById('team-select');
+  if(sel) {
+    sel.innerHTML = '<option value="">— Choose Team —</option>';
+    teams.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      sel.appendChild(o);
+    });
+  }
+  populateOperatorDropdowns();
+}
+
+// ═══════════════════════════════════════════════════════════
+// QR CODE GENERATOR (using qrcode.js library)
+// ═══════════════════════════════════════════════════════════
+function generateQRCode(canvasId, text) {
+  const container = document.getElementById(canvasId);
+  if(!container) return;
+  // Clear previous content
+  container.innerHTML = '';
+  try {
+    new QRCode(container, {
+      text: text,
+      width: 120,
+      height: 120,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    // Fallback if library not loaded yet
+    container.textContent = '(QR)';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════
+let darkMode = true;
+function toggleTheme() {
+  darkMode = !darkMode;
+  document.body.classList.toggle('light-mode', !darkMode);
+  document.querySelector('.theme-toggle').textContent = darkMode ? '🌙' : '☀️';
+  try { localStorage.setItem('aa_theme', darkMode ? 'dark' : 'light'); } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// NETWORK STATUS
+// ═══════════════════════════════════════════════════════════
+function updateNetworkStatus() {
+  const dot = document.getElementById('net-dot');
+  const txt = document.getElementById('net-text');
+  if(navigator.onLine) {
+    dot.classList.remove('offline');
+    txt.textContent = 'LOCAL SYNC';
+  } else {
+    dot.classList.add('offline');
+    txt.textContent = 'OFFLINE';
+  }
+}
+window.addEventListener('online', updateNetworkStatus);
+window.addEventListener('offline', updateNetworkStatus);
+
+// ═══════════════════════════════════════════════════════════
+// STUDENT LOGIC
+// ═══════════════════════════════════════════════════════════
+function studentLogin() {
+  const name = document.getElementById('student-name').value.trim();
+  const team = document.getElementById('team-select').value;
+  const err  = document.getElementById('login-error');
+
+  if(!name) { showLoginError('Please enter your name.'); return; }
+  if(!team) { showLoginError('Please select your team.'); return; }
+  err.classList.add('hidden');
+
+  loadState();
+  if(state.teams[team] && state.teams[team].eliminated) {
+    showLoginError('Your team has been eliminated from the competition.');
+    return;
+  }
+  if(!state.teams[team]) {
+    state.teams[team] = { score:0, eliminated:false, correct:0, wrong:0, total:0, powerups:{double:1,skip:1,fifty:1}, fastestQ:-1 };
+    saveState();
+  }
+
+  myName = name;
+  myTeam = team;
+  myRole = 'student';
+
+  // Session recovery
+  try { sessionStorage.setItem('aa_student', JSON.stringify({myName, myTeam})); } catch(e){}
+
+  document.getElementById('waiting-team-display').textContent = `${name} · ${team}`;
+  document.getElementById('hdr-team').textContent = team;
+
+  routeStudentByState();
+  startStudentPoller();
+}
+function showLoginError(msg) {
+  const err = document.getElementById('login-error');
+  err.textContent = msg;
+  err.classList.remove('hidden');
+}
+
+let lastSeenRevealedQ = -1;
+
+function routeStudentByState() {
+  loadState();
+  if(!myTeam) return;
+
+  if(state.teams[myTeam] && state.teams[myTeam].eliminated) {
+    showScreen('eliminated-screen');
+    return;
+  }
+  if(state.operatorPhase === 'final') {
+    showScreen('podium-screen');
+    renderPodium();
+    return;
+  }
+  if(state.quizRunning && state.operatorPhase === 'question' && state.operatorCurrentQ >= 0) {
+    if(lastSeenQ !== state.operatorCurrentQ) {
+      lastSeenQ = state.operatorCurrentQ;
+      lastSeenPhase = 'question';
+      showStudentQuestion();
+    } else {
+      // Update timer only
+      updateStudentTimer();
+      // Check reveal during question phase
+      if(state.revealedQ !== undefined && state.revealedQ === state.operatorCurrentQ && lastSeenRevealedQ !== state.revealedQ) {
+        lastSeenRevealedQ = state.revealedQ;
+        revealCorrectToStudents(state.revealedQ);
+      }
+    }
+    return;
+  }
+  if(state.quizRunning && state.operatorPhase === 'results') {
+    if(lastSeenPhase !== 'results') {
+      lastSeenPhase = 'results';
+      // Show survived screen briefly before results
+      if(state.currentRound < 4) {
+        showScreen('survived-screen');
+        document.getElementById('survived-msg-sub').textContent = `Your team advances to Round ${state.currentRound + 1}!`;
+        renderSurvivedMiniLb();
+        setTimeout(() => {
+          if(state.operatorPhase === 'results') showStudentResults();
+        }, 3000);
+      } else {
+        showStudentResults();
+      }
+    } else {
+      // Also handle reveal during results phase
+      if(state.revealedQ !== undefined && lastSeenRevealedQ !== state.revealedQ) {
+        lastSeenRevealedQ = state.revealedQ;
+      }
+    }
+    return;
+  }
+  if(state.operatorPhase === 'idle' || !state.quizRunning) {
+    if(lastSeenPhase !== 'idle') {
+      lastSeenPhase = 'idle';
+      showScreen('waiting-screen');
+      renderWaitingMiniLb();
+    }
+    return;
+  }
+}
+
+function renderSurvivedMiniLb() {
+  const wrap = document.getElementById('survived-mini-lb');
+  if(!wrap) return;
+  const sorted = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .sort((a,b) => b[1].score - a[1].score);
+  if(sorted.length === 0) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<div class="mini-lb"><div class="mini-lb-title">Survivors</div>' +
+    sorted.map(([name,data],i) => `
+      <div class="mini-lb-row${name===myTeam?' me':''}">
+        <div class="mini-lb-rank${i<3?' r'+(i+1):''}">${i<3?['🥇','🥈','🥉'][i]:'#'+(i+1)}</div>
+        <div class="mini-lb-name">${name}</div>
+        <div class="mini-lb-score">${data.score}</div>
+      </div>`).join('') + '</div>';
+}
+
+function startStudentPoller() {
+  if(studentPollInterval) clearInterval(studentPollInterval);
+  studentPollInterval = setInterval(() => {
+    loadState();
+    routeStudentByState();
+  }, 500);
+}
+
+function showStudentQuestion() {
+  loadState();
+  const qi = state.operatorCurrentQ;
+  if(qi < 0 || qi >= QUESTIONS.length) return;
+  const q = QUESTIONS[qi];
+  const r = q.r;
+  const rinfo = ROUND_INFO[r];
+  const qInRound = getQInRound(qi);
+
+  showScreen('quiz-screen');
+  lastSeenPhase = 'question';
+  activeDouble = false;
+  activeFifty = false;
+  hiddenOpts = [];
+
+  // Header
+  document.getElementById('hdr-round').textContent = rinfo.name;
+  document.getElementById('hdr-team').textContent = myTeam;
+  document.getElementById('hdr-score').textContent = (state.teams[myTeam]?.score || 0) + ' pts';
+  document.getElementById('hdr-q').textContent = `Q ${qInRound+1}/${rinfo.qs}`;
+
+  // Rank
+  updateStudentRankDisplay();
+
+  // Progress bar
+  const totalQ = QUESTIONS.length;
+  document.getElementById('prog-bar').style.width = ((qi / totalQ) * 100) + '%';
+
+  // Case
+  const cb = document.getElementById('case-banner');
+  if(q.case) { cb.textContent = q.case; cb.classList.remove('hidden'); }
+  else { cb.classList.add('hidden'); }
+
+  // Question number and difficulty
+  document.getElementById('q-num-badge').textContent = `Q ${qInRound+1}`;
+  const diffLabels = { 1:'⚪ Easy', 2:'🟡 Medium', 3:'🔴 Hard ⚡', 4:'🟣 Expert' };
+  const diffEl = document.getElementById('q-diff-label');
+  if(diffEl) diffEl.textContent = diffLabels[r] || '';
+  document.getElementById('q-text').textContent = q.q;
+
+  // Options
+  const letters = ['A','B','C','D'];
+  for(let i=0;i<4;i++) {
+    const btn = document.getElementById('opt-'+i);
+    const txt = document.getElementById('opt-text-'+i);
+    btn.className = 'option-btn';
+    btn.disabled = false;
+    txt.textContent = q.opts[i];
+  }
+
+  // Check if already answered
+  const ansKey = myTeam + '_' + qi;
+  const alreadyAns = state.teamAnsweredQ[ansKey] !== undefined;
+  if(alreadyAns) {
+    lockOptions(qi, state.teamAnsweredQ[ansKey]);
+  }
+
+  // Re-apply 50-50 if it was active for this question
+  const pu50Key = myTeam + '_50_' + qi;
+  if(state.used50 && state.used50[pu50Key]) {
+    activeFifty = true;
+    applyFiftyFifty();
+  }
+
+  document.getElementById('answered-notice').classList.toggle('hidden', !alreadyAns);
+
+  // Q stats
+  document.getElementById('q-stats-wrap').classList.add('hidden');
+  document.getElementById('q-stats-wrap').innerHTML = '';
+
+  // Power-ups
+  renderStudentPowerups();
+
+  // Mini leaderboard
+  renderMiniLeaderboard();
+
+  // Timer
+  startStudentTimer();
+}
+
+function updateStudentTimer() {
+  loadState();
+  const qi = state.operatorCurrentQ;
+  if(qi < 0) return;
+  const q = QUESTIONS[qi];
+  const maxTime = ROUND_INFO[q.r].time;
+  const left = state.timerLeft;
+  setStudentTimerDisplay(left, maxTime);
+}
+
+function startStudentTimer() {
+  if(studentTimerInterval) clearInterval(studentTimerInterval);
+  updateStudentTimer();
+  studentTimerInterval = setInterval(() => {
+    loadState();
+    updateStudentTimer();
+  }, 1000);
+}
+
+function setStudentTimerDisplay(left, maxTime) {
+  const ring  = document.getElementById('timer-ring');
+  const num   = document.getElementById('timer-num');
+  if(!ring || !num) return;
+
+  const circumference = 2 * Math.PI * 65;
+  const progress = left / maxTime;
+  const offset = circumference * (1 - progress);
+
+  ring.style.strokeDasharray = circumference;
+  ring.style.strokeDashoffset = offset;
+  num.textContent = left;
+
+  ring.classList.remove('warning','danger');
+  num.classList.remove('warning','danger');
+
+  if(left <= 5) {
+    ring.classList.add('danger');
+    num.classList.add('danger');
+    triggerCountdownBurst(left);
+  } else if(left <= Math.floor(maxTime * 0.4)) {
+    ring.classList.add('warning');
+    num.classList.add('warning');
+  }
+}
+
+let lastBurstNum = -1;
+function triggerCountdownBurst(n) {
+  if(n === lastBurstNum || n <= 0) return;
+  lastBurstNum = n;
+  const wrap = document.createElement('div');
+  wrap.className = 'countdown-burst';
+  const span = document.createElement('div');
+  span.className = 'burst-number';
+  span.textContent = n;
+  wrap.appendChild(span);
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 1000);
+  // Vibrate if supported
+  if(navigator.vibrate) navigator.vibrate(50);
+}
+
+function updateStudentRankDisplay() {
+  const sorted = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .sort((a,b) => b[1].score - a[1].score);
+  const myIdx = sorted.findIndex(([k]) => k === myTeam);
+  const rank = myIdx + 1;
+  const rankEl = document.getElementById('hdr-rank');
+  const gapEl = document.getElementById('hdr-gap');
+  if(myIdx >= 0) {
+    rankEl.textContent = `#${rank}`;
+    rankEl.classList.remove('hidden');
+    if(gapEl) {
+      if(myIdx < sorted.length - 1) {
+        const gap = sorted[myIdx][1].score - sorted[myIdx+1][1].score;
+        gapEl.textContent = gap > 0 ? `+${gap} ahead` : 'Tied';
+        gapEl.classList.remove('hidden');
+      } else {
+        gapEl.classList.add('hidden');
+      }
+    }
+  }
+}
+
+// ─── Options ───
+let pendingOption = -1;
+function selectOption(idx) {
+  loadState();
+  const qi = state.operatorCurrentQ;
+  if(qi < 0) return;
+  const ansKey = myTeam + '_' + qi;
+  if(state.teamAnsweredQ[ansKey] !== undefined) return;
+  if(state.timerLeft <= 0) return;
+  if(hiddenOpts.includes(idx)) return;
+
+  pendingOption = idx;
+  // Show confirm popup
+  const q = QUESTIONS[qi];
+  showConfirmPopup(q.opts[idx], idx);
+}
+
+function showConfirmPopup(optText, idx) {
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-popup';
+  overlay.id = 'confirm-popup';
+  overlay.innerHTML = `
+    <div class="confirm-box">
+      <div class="confirm-question">Lock your answer?</div>
+      <div class="confirm-answer">${['A','B','C','D'][idx]}. ${optText}</div>
+      <div class="confirm-btns">
+        <button class="btn btn-primary btn-sm" onclick="confirmAnswer(${idx})">✓ LOCK IT</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('confirm-popup').remove()">✗ CANCEL</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function confirmAnswer(idx) {
+  document.getElementById('confirm-popup')?.remove();
+  loadState();
+  const qi = state.operatorCurrentQ;
+  if(qi < 0) return;
+  const ansKey = myTeam + '_' + qi;
+  if(state.teamAnsweredQ[ansKey] !== undefined) return;
+  if(state.operatorPhase !== 'question') { showToast('Round has ended!', 'error'); return; }
+  if(state.timerLeft <= 0) { showToast('Time is up!', 'error'); return; }
+
+  const q = QUESTIONS[qi];
+  const isCorrect = idx === q.ans;
+  const rinfo = ROUND_INFO[q.r];
+  let points = 0;
+
+  if(isCorrect) {
+    points = (q.r === 3 || q.r === 4) ? 2 : 1;
+    state.teams[myTeam].correct = (state.teams[myTeam].correct || 0) + 1;
+    if(activeDouble) points *= 2;
+  } else {
+    if(rinfo.negMark) points = -1;
+    state.teams[myTeam].wrong = (state.teams[myTeam].wrong || 0) + 1;
+  }
+
+  state.teams[myTeam].total = (state.teams[myTeam].total || 0) + 1;
+  state.teams[myTeam].score = (state.teams[myTeam].score || 0) + points;
+  state.teamAnsweredQ[ansKey] = idx;
+
+  // Track response distribution
+  if(!state.questionResponses[qi]) state.questionResponses[qi] = [0,0,0,0];
+  state.questionResponses[qi][idx]++;
+
+  // Fastest team
+  if(!state.fastestTeam[qi]) state.fastestTeam[qi] = myTeam;
+
+  activeDouble = false;
+  broadcastState();
+
+  lockOptions(qi, idx);
+  document.getElementById('answered-notice').classList.remove('hidden');
+  showScoreFlash(points);
+  updateStudentRankDisplay();
+  document.getElementById('hdr-score').textContent = state.teams[myTeam].score + ' pts';
+}
+
+function lockOptions(qi, selectedIdx) {
+  const q = QUESTIONS[qi];
+  for(let i=0;i<4;i++) {
+    const btn = document.getElementById('opt-'+i);
+    btn.disabled = true;
+    if(i === selectedIdx) {
+      btn.classList.add(selectedIdx === q.ans ? 'correct' : 'wrong');
+    }
+    if(i === q.ans && selectedIdx !== q.ans) {
+      // Don't reveal on student side until operator reveals
+    }
+  }
+}
+
+function showScoreFlash(points) {
+  const el = document.createElement('div');
+  el.className = 'score-flash ' + (points > 0 ? 'plus' : points < 0 ? 'minus' : 'zero');
+  el.textContent = points > 0 ? '+'+points : points;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1300);
+}
+
+// ─── Power-ups ───
+function renderStudentPowerups() {
+  const wrap = document.getElementById('student-powerups');
+  const row = document.getElementById('powerup-row');
+  if(!wrap || !row) return;
+
+  loadState();
+  const pu = state.teams[myTeam]?.powerups;
+  if(!pu) { wrap.classList.add('hidden'); return; }
+
+  const hasAny = Object.values(pu).some(v => v > 0);
+  if(!hasAny) { wrap.classList.add('hidden'); return; }
+
+  wrap.classList.remove('hidden');
+  row.innerHTML = '';
+
+  const puDefs = [
+    { key:'double', label:'⚡ 2x Score', desc:'Double points this question' },
+    { key:'skip',   label:'⏭ Skip', desc:'Skip current question safely' },
+    { key:'fifty',  label:'✂ 50-50', desc:'Remove 2 wrong answers' },
+  ];
+
+  puDefs.forEach(p => {
+    const count = pu[p.key] || 0;
+    if(count <= 0) return;
+    const btn = document.createElement('button');
+    btn.className = 'powerup-btn';
+    btn.textContent = p.label + ` (${count})`;
+    btn.title = p.desc;
+    btn.onclick = () => usePowerup(p.key);
+    row.appendChild(btn);
+  });
+}
+
+function usePowerup(key) {
+  loadState();
+  const pu = state.teams[myTeam]?.powerups;
+  if(!pu || !pu[key]) return;
+
+  const qi = state.operatorCurrentQ;
+  if(qi < 0) return;
+  const ansKey = myTeam + '_' + qi;
+  if(state.teamAnsweredQ[ansKey] !== undefined) { showToast('Already answered!', 'error'); return; }
+
+  pu[key]--;
+  broadcastState();
+
+  if(key === 'double') {
+    activeDouble = true;
+    showToast('⚡ Double Score active for this question!');
+  } else if(key === 'skip') {
+    // Auto-lock with 0 points, skip
+    state.teamAnsweredQ[ansKey] = -1; // -1 = skipped
+    broadcastState();
+    document.getElementById('answered-notice').classList.remove('hidden');
+    showToast('⏭ Question skipped safely.');
+  } else if(key === 'fifty') {
+    activeFifty = true;
+    // Track in state so re-renders can restore it
+    if(!state.used50) state.used50 = {};
+    const pu50Key = myTeam + '_50_' + state.operatorCurrentQ;
+    state.used50[pu50Key] = true;
+    broadcastState();
+    applyFiftyFifty();
+    showToast('✂ 50-50 applied! Two wrong answers removed.');
+  }
+  renderStudentPowerups();
+}
+
+function applyFiftyFifty() {
+  const qi = state.operatorCurrentQ;
+  if(qi < 0) return;
+  const q = QUESTIONS[qi];
+  const wrongIdxs = [0,1,2,3].filter(i => i !== q.ans);
+  hiddenOpts = wrongIdxs.slice(0, 2);
+  hiddenOpts.forEach(i => {
+    const btn = document.getElementById('opt-'+i);
+    btn.classList.add('hidden-powerup');
+  });
+}
+
+// ─── Mini Leaderboard ───
+function renderMiniLeaderboard() {
+  loadState();
+  const wrap = document.getElementById('quiz-mini-lb');
+  const rows = document.getElementById('mini-lb-rows');
+  if(!wrap || !rows) return;
+
+  const sorted = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .sort((a,b) => b[1].score - a[1].score);
+
+  if(sorted.length === 0) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  rows.innerHTML = '';
+
+  const myIdx = sorted.findIndex(([k]) => k === myTeam);
+  // Show nearby ranks: top 3 + me if not in top 3
+  const showIdxs = new Set([0,1,2]);
+  if(myIdx >= 0) showIdxs.add(myIdx);
+  if(myIdx > 0) showIdxs.add(myIdx-1);
+  if(myIdx < sorted.length-1) showIdxs.add(myIdx+1);
+
+  Array.from(showIdxs).sort((a,b)=>a-b).forEach(i => {
+    if(i >= sorted.length) return;
+    const [name, data] = sorted[i];
+    const acc = data.total > 0 ? Math.round((data.correct/data.total)*100) : 0;
+    const row = document.createElement('div');
+    row.className = 'mini-lb-row' + (name === myTeam ? ' me' : '') + (data.eliminated ? ' eliminated-row' : '');
+    const rankClass = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+    row.innerHTML = `
+      <div class="mini-lb-rank ${rankClass}">${i<3?['🥇','🥈','🥉'][i]:'#'+(i+1)}</div>
+      <div class="mini-lb-name">${name}${name===myTeam?' (You)':''}</div>
+      <div class="mini-lb-accuracy">${acc}%</div>
+      <div class="mini-lb-score">${data.score}</div>`;
+    rows.appendChild(row);
+  });
+}
+
+function renderWaitingMiniLb() {
+  loadState();
+  const wrap = document.getElementById('waiting-mini-lb');
+  if(!wrap) return;
+  const sorted = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .sort((a,b) => b[1].score - a[1].score);
+  if(sorted.length === 0 || sorted.every(([,v]) => v.score === 0)) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<div class="mini-lb"><div class="mini-lb-title">Current Standings</div>' +
+    sorted.map(([name,data],i) => `
+      <div class="mini-lb-row${name===myTeam?' me':''}${data.eliminated?' eliminated-row':''}">
+        <div class="mini-lb-rank${i<3?' r'+(i+1):''}">${i<3?['🥇','🥈','🥉'][i]:'#'+(i+1)}</div>
+        <div class="mini-lb-name">${name}</div>
+        <div class="mini-lb-score">${data.score}</div>
+      </div>`).join('') + '</div>';
+}
+
+// ─── Reveal correct answer to students ───
+function revealCorrectToStudents(qi) {
+  if(qi < 0 || qi >= QUESTIONS.length) return;
+  const q = QUESTIONS[qi];
+  for(let i=0;i<4;i++) {
+    const btn = document.getElementById('opt-'+i);
+    if(!btn) continue;
+    if(i === q.ans) btn.classList.add('correct');
+  }
+  // Show difficulty stat
+  const resp = state.questionResponses[qi] || [0,0,0,0];
+  const total = resp.reduce((a,b)=>a+b,0);
+  if(total > 0) {
+    const correctPct = Math.round((resp[q.ans]/total)*100);
+    const wrap = document.getElementById('q-stats-wrap');
+    if(wrap) {
+      wrap.classList.remove('hidden');
+      wrap.innerHTML = `
+        <span class="q-stat-chip">✓ ${correctPct}% got it right</span>
+        <span class="q-stat-chip">👥 ${total} responses</span>
+        ${state.fastestTeam[qi] ? `<span class="q-stat-chip">⚡ Fastest: ${state.fastestTeam[qi]}</span>` : ''}
+      `;
+    }
+  }
+}
+
+// ─── Results ───
+function showStudentResults() {
+  showScreen('results-screen');
+  lastSeenPhase = 'results';
+  renderLeaderboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+// OPERATOR LOGIC
+// ═══════════════════════════════════════════════════════════
+function operatorLogin() {
+  const pw = document.getElementById('op-password').value;
+  const err = document.getElementById('op-login-error');
+  if(pw !== OP_PASSWORD) {
+    err.textContent = 'Incorrect password.';
+    err.classList.remove('hidden');
+    return;
+  }
+  err.classList.add('hidden');
+  myRole = 'operator';
+  loadState();
+  showScreen('operator-screen');
+  populateOperatorDropdowns();
+  renderOpLeaderboard();
+  renderScoreOverrideRows();
+  generateTeamNameInputs();
+  generateRoundConfigRows();
+
+  // Start syncing
+  setInterval(() => {
+    loadState();
+    renderOpLeaderboard();
+    updateAnswerCount();
+    updateOpTimer();
+  }, 500);
+}
+
+function checkOperatorForSetup() {
+  // Allow setup from landing without password (limited)
+  loadState();
+  generateTeamNameInputs();
+  generateRoundConfigRows();
+}
+
+function populateOperatorDropdowns() {
+  loadState();
+  const teams = Object.keys(state.teams);
+  ['bonus-team-sel','pu-team-sel'].forEach(id => {
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    sel.innerHTML = '';
+    teams.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t; o.textContent = t.replace('Team ','');
+      sel.appendChild(o);
+    });
+  });
+}
+
+function updateAnswerCount() {
+  const qi = state.operatorCurrentQ;
+  if(qi < 0) return;
+  const count = Object.keys(state.teamAnsweredQ).filter(k => k.endsWith('_'+qi)).length;
+  const total = Object.values(state.teams).filter(t => !t.eliminated).length;
+  const el = document.getElementById('op-answers-count');
+  if(el) el.textContent = `${count}/${total} answered`;
+
+  updateResponseDist(qi);
+}
+
+function updateResponseDist(qi) {
+  const wrap = document.getElementById('response-dist');
+  if(!wrap) return;
+  const resp = state.questionResponses[qi] || [0,0,0,0];
+  const total = resp.reduce((a,b)=>a+b,0);
+  const letters = ['A','B','C','D'];
+  wrap.innerHTML = letters.map((l,i) => {
+    const pct = total > 0 ? Math.round(resp[i]/total*100) : 0;
+    return `<div style="flex:1;text-align:center;">
+      <div style="font-family:'JetBrains Mono';font-size:0.7rem;color:var(--muted);margin-bottom:4px;">${l} (${resp[i]})</div>
+      <div style="height:40px;background:var(--surface3);border-radius:3px;display:flex;align-items:flex-end;overflow:hidden;">
+        <div style="width:100%;height:${pct}%;background:${i===QUESTIONS[qi]?.ans?'var(--green)':'var(--accent)'};border-radius:3px;transition:height 0.5s;"></div>
+      </div>
+      <div style="font-family:'JetBrains Mono';font-size:0.68rem;color:var(--muted);margin-top:3px;">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function getQInRound(qi) {
+  const q = QUESTIONS[qi];
+  const r = q.r;
+  const firstInRound = QUESTIONS.findIndex(qq => qq.r === r);
+  return qi - firstInRound;
+}
+
+let nextQIdx = 0;
+function operatorNext() {
+  loadState();
+  if(!state.quizRunning) {
+    state.quizRunning = true;
+    state.currentRound = 1;
+    nextQIdx = 0;
+  }
+
+  if(nextQIdx >= QUESTIONS.length) {
+    operatorFinish();
+    return;
+  }
+
+  // Check round change
+  const q = QUESTIONS[nextQIdx];
+  if(q.r !== state.currentRound) {
+    if(q.r > state.currentRound) {
+      // Trigger round transition
+      state.currentRound = q.r;
+      showRoundTransition(q.r, () => {
+        proceedToQuestion(nextQIdx);
+      });
+      broadcastState();
+      return;
+    }
+  }
+
+  proceedToQuestion(nextQIdx);
+}
+
+function proceedToQuestion(qi) {
+  loadState();
+  if(opTimerInterval) { clearInterval(opTimerInterval); opTimerInterval = null; }
+
+  state.operatorCurrentQ = qi;
+  state.operatorPhase = 'question';
+  state.timerPaused = false;
+
+  const q = QUESTIONS[qi];
+  const rinfo = ROUND_INFO[q.r];
+  state.timerLeft = rinfo.time;
+  state.timerMax = rinfo.time;
+  state.currentRound = q.r;
+
+  nextQIdx = qi + 1;
+
+  broadcastState();
+  renderOpQuestion(qi);
+
+  document.getElementById('op-q-badge').textContent = `Q ${getQInRound(qi)+1}/${rinfo.qs}`;
+  document.getElementById('op-round-badge').textContent = q.r;
+
+  document.getElementById('op-question-panel').style.display = 'block';
+  document.getElementById('op-lb-panel').style.display = 'none';
+
+  lastBurstNum = -1;
+
+  opTimerInterval = setInterval(() => {
+    loadState();
+    if(state.timerPaused) return;
+    if(state.timerLeft > 0) {
+      state.timerLeft--;
+      broadcastState();
+      updateOpTimerDisplay();
+    } else {
+      clearInterval(opTimerInterval);
+      opTimerInterval = null;
+      // Auto-reveal after timeout
+      // operatorReveal(); // optional: auto reveal
+    }
+  }, 1000);
+}
+
+function updateOpTimer() {
+  if(state.operatorPhase === 'question') updateOpTimerDisplay();
+}
+
+function updateOpTimerDisplay() {
+  const left = state.timerLeft;
+  const max  = state.timerMax;
+  const pct  = max > 0 ? (left / max * 100) : 100;
+
+  const fill = document.getElementById('op-timer-fill');
+  const big  = document.getElementById('op-big-timer');
+  if(!fill || !big) return;
+
+  fill.style.width = pct + '%';
+  big.textContent = left;
+  big.className = 'op-big-timer';
+  fill.className = 'op-timer-fill';
+
+  if(left <= 5) {
+    big.classList.add('danger');
+    fill.classList.add('danger');
+  } else if(left <= Math.floor(max * 0.4)) {
+    big.classList.add('warn');
+    fill.classList.add('warn');
+  } else {
+    big.classList.add('normal');
+    fill.classList.add('normal');
+  }
+}
+
+function renderOpQuestion(qi) {
+  const q = QUESTIONS[qi];
+  const rinfo = ROUND_INFO[q.r];
+  const letters = ['A','B','C','D'];
+
+  document.getElementById('op-rl').textContent = rinfo.name + ' · ' + rinfo.sub;
+  document.getElementById('op-qnum').textContent = `Question ${getQInRound(qi)+1} of ${rinfo.qs}`;
+
+  const ci = document.getElementById('op-case-info');
+  if(q.case) { ci.textContent = q.case; ci.style.display = 'block'; }
+  else ci.style.display = 'none';
+
+  document.getElementById('op-qtext').textContent = q.q;
+  document.getElementById('op-big-timer').textContent = rinfo.time;
+  document.getElementById('op-timer-fill').style.width = '100%';
+
+  letters.forEach((l,i) => {
+    const d = document.getElementById('op-opt-'+i);
+    if(d) {
+      d.className = 'op-option';
+      d.innerHTML = `<span class="op-opt-letter">${l}.</span>${q.opts[i]}`;
+    }
+  });
+
+  // Clear response dist
+  document.getElementById('response-dist').innerHTML = '';
+
+  renderOpLeaderboard();
+}
+
+function operatorReveal() {
+  loadState();
+  const qi = state.operatorCurrentQ;
+  if(qi < 0) return;
+  const q = QUESTIONS[qi];
+
+  // Highlight correct option in operator panel
+  document.querySelectorAll('.op-option').forEach((el,i) => {
+    if(i === q.ans) el.classList.add('revealed');
+  });
+
+  // Show answer overlay
+  const resp = state.questionResponses[qi] || [0,0,0,0];
+  const total = resp.reduce((a,b)=>a+b,0);
+  const correctPct = total > 0 ? Math.round((resp[q.ans]/total)*100) : 0;
+
+  const ov = document.createElement('div');
+  ov.className = 'answer-overlay';
+  ov.innerHTML = `
+    <div class="answer-box">
+      <div class="answer-label">✓ Correct Answer</div>
+      <div class="answer-value">${['A','B','C','D'][q.ans]}. ${q.opts[q.ans]}</div>
+      <div class="answer-difficulty">${correctPct}% of teams got it right · ${total} total responses</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">CLOSE</button>`;
+  document.body.appendChild(ov);
+
+  // Broadcast reveal to students
+  state.revealedQ = qi;
+  broadcastState();
+}
+
+function operatorTogglePause() {
+  loadState();
+  state.timerPaused = !state.timerPaused;
+  broadcastState();
+  const btn = document.getElementById('btn-pause');
+  if(btn) btn.textContent = state.timerPaused ? '▶ Resume' : '⏸ Pause';
+  showToast(state.timerPaused ? 'Timer paused' : 'Timer resumed');
+}
+
+function operatorSkip() {
+  if(opTimerInterval) { clearInterval(opTimerInterval); opTimerInterval = null; }
+  operatorNext();
+  showToast('⏭ Question skipped');
+}
+
+function operatorEndRound() {
+  loadState();
+  if(opTimerInterval) { clearInterval(opTimerInterval); opTimerInterval = null; }
+  state.timerLeft = 0;
+  state.operatorPhase = 'results'; // Set phase BEFORE broadcast so students see it immediately
+
+  // Auto suggest eliminations
+  suggestEliminations();
+
+  broadcastState();
+
+  document.getElementById('op-question-panel').style.display = 'none';
+  document.getElementById('op-lb-panel').style.display = 'block';
+  renderOperatorLeaderboard();
+  renderRoundInsights();
+  renderAccuracyBars();
+}
+
+function suggestEliminations() {
+  const r = state.currentRound;
+  const toElim = ELIM_AFTER[r] || 0;
+  if(toElim === 0) { state.pendingElim = []; return; }
+
+  const active = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .sort((a,b) => a[1].score - b[1].score);
+
+  state.pendingElim = active.slice(0, toElim).map(([name]) => name);
+}
+
+function finalizeEliminations() {
+  if(!state.pendingElim || state.pendingElim.length === 0) {
+    showToast('No teams marked for elimination.');
+    return;
+  }
+
+  const names = state.pendingElim.join(', ');
+  if(!confirm(`Eliminate: ${names}?`)) return;
+
+  loadState();
+  state.pendingElim.forEach(name => {
+    if(state.teams[name]) state.teams[name].eliminated = true;
+  });
+  state.pendingElim = [];
+  broadcastState();
+  renderOperatorLeaderboard();
+  showToast('Teams eliminated!', 'error');
+}
+
+function operatorFinish() {
+  loadState();
+  state.operatorPhase = 'final';
+  broadcastState();
+  // Stay on operator screen - show results panel with final podium
+  document.getElementById('op-question-panel').style.display = 'none';
+  document.getElementById('op-lb-panel').style.display = 'block';
+  document.getElementById('op-res-title').textContent = '🏆 FINAL RESULTS';
+  document.getElementById('op-res-sub').textContent = 'Quiz complete — all rounds finished';
+  renderOperatorLeaderboard();
+  // Also show podium button hint
+  showToast('Quiz complete! Students see the podium screen.', 'success');
+}
+
+function operatorNextRound() {
+  loadState();
+  const nextR = state.currentRound + 1;
+  if(nextR > 4) { operatorFinish(); return; }
+
+  state.currentRound = nextR;
+  state.operatorPhase = 'question';
+  broadcastState();
+
+  showRoundTransition(nextR, () => {
+    document.getElementById('op-lb-panel').style.display = 'none';
+    document.getElementById('op-question-panel').style.display = 'block';
+    // Find the first question of the new round and go directly to it
+    const firstQOfRound = QUESTIONS.findIndex(q => q.r === nextR);
+    if(firstQOfRound >= 0) {
+      nextQIdx = firstQOfRound;
+      proceedToQuestion(nextQIdx);
+    } else {
+      operatorFinish();
+    }
+  });
+}
+
+function renderOperatorLeaderboard() {
+  loadState();
+  const r = state.currentRound;
+  const rinfo = ROUND_INFO[r] || { name:'RESULTS' };
+  document.getElementById('op-res-title').textContent = rinfo.name + ' RESULTS';
+
+  const totalElim = Object.values(state.teams).filter(t=>t.eliminated).length;
+  const active = Object.values(state.teams).filter(t=>!t.eliminated).length;
+  document.getElementById('op-res-sub').textContent =
+    `${totalElim} eliminated · ${active} active · Round ${r} complete`;
+
+  const list = document.getElementById('op-lb-list');
+  list.innerHTML = '';
+  const sorted = Object.entries(state.teams).sort((a,b) => b[1].score - a[1].score);
+  sorted.forEach(([name,data],idx) => {
+    const medals = ['🥇','🥈','🥉'];
+    const rank = idx < 3 ? medals[idx] : `#${idx+1}`;
+    const acc = data.total > 0 ? Math.round(data.correct/data.total*100) : 0;
+    const row = document.createElement('div');
+    row.className = `lb-row rank-${idx+1}${data.eliminated?' eliminated':''}`;
+    row.style.animationDelay = `${idx*0.06}s`;
+    row.innerHTML = `
+      <div class="lb-rank">${rank}</div>
+      <div class="lb-team">${name}
+        ${data.eliminated?'<span class="tag tag-elim">ELIM</span>':'<span class="tag tag-adv">ADV</span>'}
+      </div>
+      <div class="lb-stat">${acc}% acc</div>
+      <div class="lb-score">${data.score}</div>`;
+    list.appendChild(row);
+  });
+
+  // Render elimination panel
+  renderEliminationPanel();
+}
+
+function elimChangeHandler(e) {
+  if(e.target.dataset.team !== undefined) {
+    togglePendingElim(e.target.dataset.team, e.target.checked);
+  }
+}
+
+function renderEliminationPanel() {
+  loadState();
+  const r = state.currentRound;
+  const toElim = ELIM_AFTER[r] || 0;
+  const panel = document.getElementById('elim-panel');
+  const list = document.getElementById('elim-team-list');
+
+  if(toElim === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  list.innerHTML = '';
+
+  const active = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .sort((a,b) => a[1].score - b[1].score);
+
+  active.forEach(([name,data],i) => {
+    const isPending = (state.pendingElim||[]).includes(name);
+    const isCutoff = i === toElim - 1;
+    const safeId = 'elim-cb-' + i;
+
+    const row = document.createElement('div');
+    row.className = 'elim-team-row';
+    row.innerHTML = `
+      <input type="checkbox" class="elim-checkbox" id="${safeId}" data-team="${name.replace(/"/g,'&quot;')}"
+        ${isPending?'checked':''}/>
+      <label for="${safeId}" style="flex:1;cursor:pointer;font-weight:${isPending?'700':'400'};color:${isPending?'var(--red)':'var(--text)'};">${name}</label>
+      <span style="font-family:'JetBrains Mono';font-size:0.8rem;color:var(--muted);">${data.score} pts</span>`;
+    list.appendChild(row);
+
+    if(isCutoff && i < active.length-1) {
+      const cut = document.createElement('div');
+      cut.innerHTML = '<div class="cutoff-line"></div><div class="cutoff-label">── ELIMINATION CUTOFF ──</div>';
+      list.appendChild(cut);
+    }
+  });
+
+  // Use delegated event listener instead of inline onchange
+  list.removeEventListener('change', elimChangeHandler);
+  list.addEventListener('change', elimChangeHandler);
+}
+
+function togglePendingElim(name, checked) {
+  if(!state.pendingElim) state.pendingElim = [];
+  if(checked) { if(!state.pendingElim.includes(name)) state.pendingElim.push(name); }
+  else { state.pendingElim = state.pendingElim.filter(n=>n!==name); }
+}
+
+function renderRoundInsights() {
+  loadState();
+  const wrap = document.getElementById('op-round-insights');
+  if(!wrap) return;
+
+  const sorted = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .sort((a,b) => b[1].score - a[1].score);
+  const best = sorted[0];
+  const allAcc = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .map(([,v]) => v.total>0?v.correct/v.total:0);
+  const avgAcc = allAcc.length > 0 ? Math.round(allAcc.reduce((a,b)=>a+b,0)/allAcc.length*100) : 0;
+
+  // Question difficulty
+  const qi = state.operatorCurrentQ;
+  const resp = qi >= 0 ? (state.questionResponses[qi]||[0,0,0,0]) : [0,0,0,0];
+  const respTotal = resp.reduce((a,b)=>a+b,0);
+  const q = qi >= 0 ? QUESTIONS[qi] : null;
+  const qCorrectPct = q && respTotal > 0 ? Math.round(resp[q.ans]/respTotal*100) : '--';
+
+  wrap.innerHTML = `
+    <div class="analytics-card">
+      <div class="analytics-label">🏆 Top Team</div>
+      <div class="analytics-value" style="font-size:1.2rem;">${best?best[0].replace('Team ',''):'—'}</div>
+      <div class="analytics-sub">${best?best[1].score+' pts':'—'}</div>
+    </div>
+    <div class="analytics-card">
+      <div class="analytics-label">📊 Avg Accuracy</div>
+      <div class="analytics-value">${avgAcc}%</div>
+      <div class="analytics-sub">across all teams</div>
+    </div>
+    <div class="analytics-card">
+      <div class="analytics-label">⚡ Fastest Team</div>
+      <div class="analytics-value" style="font-size:1.2rem;">${state.fastestTeam[qi]?state.fastestTeam[qi].replace('Team ',''):'—'}</div>
+      <div class="analytics-sub">last question</div>
+    </div>
+    <div class="analytics-card">
+      <div class="analytics-label">❓ Q Difficulty</div>
+      <div class="analytics-value">${qCorrectPct}%</div>
+      <div class="analytics-sub">got last Q right</div>
+    </div>`;
+}
+
+function renderAccuracyBars() {
+  loadState();
+  const wrap = document.getElementById('acc-bars-wrap');
+  if(!wrap) return;
+
+  const sorted = Object.entries(state.teams)
+    .filter(([,v]) => !v.eliminated)
+    .sort((a,b) => {
+      const accA = a[1].total > 0 ? a[1].correct/a[1].total : 0;
+      const accB = b[1].total > 0 ? b[1].correct/b[1].total : 0;
+      return accB - accA;
+    });
+
+  wrap.innerHTML = sorted.map(([name,data]) => {
+    const acc = data.total > 0 ? Math.round(data.correct/data.total*100) : 0;
+    return `<div class="acc-bar">
+      <div class="acc-bar-label">${name.replace('Team ','')}</div>
+      <div class="acc-bar-track">
+        <div class="acc-bar-fill" style="width:${acc}%"></div>
+      </div>
+      <div class="acc-bar-val">${acc}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderOpLeaderboard() {
+  loadState();
+  const grid = document.getElementById('op-lb-grid');
+  if(!grid) return;
+  const sorted = Object.entries(state.teams).sort((a,b) => b[1].score - a[1].score);
+  grid.innerHTML = '';
+  sorted.forEach(([name,data],i) => {
+    const acc = data.total > 0 ? Math.round(data.correct/data.total*100) : 0;
+    const medals = ['🥇','🥈','🥉'];
+    const d = document.createElement('div');
+    d.className = 'op-lb-team' + (data.eliminated?' eliminated':'');
+    d.innerHTML = `
+      <div class="op-lb-team-rank">${i<3?medals[i]:'#'+(i+1)}</div>
+      <div class="op-lb-team-name">${name.replace('Team ','')}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+        <div class="op-lb-team-score">${data.score}</div>
+        <div class="op-lb-team-acc">${acc}%</div>
+      </div>`;
+    grid.appendChild(d);
+  });
+}
+
+function renderScoreOverrideRows() {
+  loadState();
+  const wrap = document.getElementById('score-override-rows');
+  if(!wrap) return;
+  const sorted = Object.entries(state.teams).sort((a,b) => b[1].score - a[1].score);
+  wrap.innerHTML = sorted.map(([name,data]) => `
+    <div class="score-row">
+      <div class="score-row-name">${name.replace('Team ','')}</div>
+      <input type="number" class="score-input" id="override-${name.replace(/\s/g,'_')}" value="${data.score}"/>
+    </div>`).join('');
+}
+
+function applyScoreOverrides() {
+  loadState();
+  Object.keys(state.teams).forEach(name => {
+    const input = document.getElementById('override-'+name.replace(/\s/g,'_'));
+    if(input) {
+      const val = parseInt(input.value);
+      if(!isNaN(val)) state.teams[name].score = val;
+    }
+  });
+  broadcastState();
+  renderOpLeaderboard();
+  showToast('Scores updated!');
+}
+
+function applyBonus() {
+  loadState();
+  const team = document.getElementById('bonus-team-sel').value;
+  const amount = parseInt(document.getElementById('bonus-amount').value);
+  if(!team || isNaN(amount)) { showToast('Select team and amount', 'error'); return; }
+  state.teams[team].score = (state.teams[team].score || 0) + amount;
+  broadcastState();
+  renderOpLeaderboard();
+  renderScoreOverrideRows();
+  showToast(`${amount > 0 ? '+' : ''}${amount} pts to ${team}`);
+}
+
+function assignPowerup() {
+  loadState();
+  const team = document.getElementById('pu-team-sel').value;
+  const type = document.getElementById('pu-type-sel').value;
+  if(!team) { showToast('Select a team', 'error'); return; }
+  if(!state.teams[team].powerups) state.teams[team].powerups = { double:0, skip:0, fifty:0 };
+  state.teams[team].powerups[type] = (state.teams[team].powerups[type] || 0) + 1;
+  broadcastState();
+  showToast(`⚡ ${type} power-up given to ${team}`);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SHARED RENDER
+// ═══════════════════════════════════════════════════════════
+function renderLeaderboard() {
+  loadState();
+  const r = state.currentRound;
+  document.getElementById('results-title').textContent = `ROUND ${r} RESULTS`;
+  const totalElim = Object.values(state.teams).filter(t=>t.eliminated).length;
+  const advancing = Object.keys(state.teams).length - totalElim;
+  document.getElementById('results-subtitle').textContent =
+    r < 4 ? `${ELIM_AFTER[r]||0} eliminated · ${advancing} advancing`
+           : 'Final Standings';
+
+  const list = document.getElementById('leaderboard-list');
+  list.innerHTML = '';
+  const sorted = Object.entries(state.teams).sort((a,b) => b[1].score - a[1].score);
+  sorted.forEach(([name,data],idx) => {
+    const medals = ['🥇','🥈','🥉'];
+    const rank = idx < 3 ? medals[idx] : `#${idx+1}`;
+    const acc = data.total > 0 ? Math.round(data.correct/data.total*100) : 0;
+    const row = document.createElement('div');
+    row.className = `lb-row rank-${idx+1}${data.eliminated?' eliminated':''}${name===myTeam?' my-team':''}`;
+    row.style.animationDelay = `${idx*0.07}s`;
+    row.innerHTML = `
+      <div class="lb-rank">${rank}</div>
+      <div class="lb-team">${name}${name===myTeam?' (You)':''}
+        ${data.eliminated?'<span class="tag tag-elim">ELIM</span>':'<span class="tag tag-adv">ADV</span>'}
+      </div>
+      <div class="lb-stat">${acc}%</div>
+      <div class="lb-score">${data.score}</div>`;
+    list.appendChild(row);
+  });
+
+  // Insights
+  const insightRow = document.getElementById('insight-row');
+  if(insightRow) {
+    const topTeam = sorted[0];
+    const fastestQ = Object.entries(state.fastestTeam||{});
+    const fastMap = {};
+    fastestQ.forEach(([,team]) => { fastMap[team] = (fastMap[team]||0)+1; });
+    const fastest = Object.entries(fastMap).sort((a,b)=>b[1]-a[1])[0];
+    insightRow.innerHTML = `
+      <div class="insight-chip">
+        <div class="insight-label">🏆 Top Score</div>
+        <div class="insight-val">${topTeam?topTeam[0].replace('Team ',''):'—'} · ${topTeam?topTeam[1].score:'—'} pts</div>
+      </div>
+      <div class="insight-chip">
+        <div class="insight-label">⚡ Most First</div>
+        <div class="insight-val">${fastest?fastest[0].replace('Team ',''):'—'}</div>
+      </div>`;
+  }
+
+  const actDiv = document.getElementById('results-actions');
+  if(actDiv) {
+    if(state.operatorPhase === 'final') {
+      actDiv.innerHTML = '<button class="btn btn-primary" onclick="showScreen(\'podium-screen\');renderPodium()">🏆 View Final Podium</button>';
+    } else {
+      actDiv.innerHTML = '<div style="font-family:\'JetBrains Mono\';color:var(--muted);font-size:0.8rem;">Waiting for operator<span class="dots"></span></div>';
+    }
+  }
+}
+
+function renderPodium() {
+  loadState();
+  const sorted = Object.entries(state.teams).sort((a,b) => b[1].score - a[1].score);
+
+  // Visual podium (top 3)
+  const visual = document.getElementById('podium-visual');
+  if(visual && sorted.length >= 3) {
+    const order = [sorted[1], sorted[0], sorted[2]]; // silver, gold, bronze
+    const classes = ['p2','p1','p3'];
+    const labels = ['🥈2','🥇1','🥉3'];
+    visual.innerHTML = order.map((item,i) => item ? `
+      <div class="podium-block ${classes[i]}">
+        <div class="podium-name">${item[0].replace('Team ','')}</div>
+        <div class="podium-score">${item[1].score} pts</div>
+        <div class="podium-stand">${labels[i]}</div>
+      </div>` : '').join('');
+  }
+
+  // Full list
+  const pl = document.getElementById('podium-list');
+  if(pl) {
+    pl.innerHTML = '<div class="leaderboard">' + sorted.map(([name,data],idx) => {
+      const medals=['🥇','🥈','🥉'];
+      const acc = data.total > 0 ? Math.round(data.correct/data.total*100) : 0;
+      return `<div class="lb-row rank-${idx+1}${data.eliminated?' eliminated':''}" style="animation-delay:${idx*0.08}s;">
+        <div class="lb-rank">${idx<3?medals[idx]:'#'+(idx+1)}</div>
+        <div class="lb-team">${name}</div>
+        <div class="lb-stat">${acc}% acc</div>
+        <div class="lb-score">${data.score} pts</div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  // Podium insights
+  const pi = document.getElementById('podium-insights');
+  if(pi) {
+    const topAcc = Object.entries(state.teams)
+      .map(([n,d]) => [n, d.total>0?d.correct/d.total:0])
+      .sort((a,b)=>b[1]-a[1])[0];
+    const fastMap = {};
+    Object.entries(state.fastestTeam||{}).forEach(([,t]) => { fastMap[t]=(fastMap[t]||0)+1; });
+    const fastest = Object.entries(fastMap).sort((a,b)=>b[1]-a[1])[0];
+    pi.innerHTML = `
+      <div class="insight-chip">
+        <div class="insight-label">🎯 Best Accuracy</div>
+        <div class="insight-val">${topAcc?topAcc[0].replace('Team ',''):'—'} (${topAcc?Math.round(topAcc[1]*100)+'%':'—'})</div>
+      </div>
+      <div class="insight-chip">
+        <div class="insight-label">⚡ Fastest Team</div>
+        <div class="insight-val">${fastest?fastest[0].replace('Team ',''):'—'}</div>
+      </div>
+      <div class="insight-chip">
+        <div class="insight-label">🏆 Champion</div>
+        <div class="insight-val">${sorted[0]?sorted[0][0].replace('Team ',''):'—'}</div>
+      </div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ROUND TRANSITION
+// ═══════════════════════════════════════════════════════════
+function showRoundTransition(roundNum, callback) {
+  const rt = document.getElementById('round-transition');
+  const rinfo = ROUND_INFO[roundNum] || { name:'ROUND '+roundNum, sub:'', scoring:'' };
+  document.getElementById('rt-title').textContent = rinfo.name;
+  document.getElementById('rt-sub').textContent = rinfo.sub + ' · ' + rinfo.scoring;
+  rt.classList.add('active');
+  setTimeout(() => {
+    rt.classList.remove('active');
+    if(callback) callback();
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETUP PANEL
+// ═══════════════════════════════════════════════════════════
+function switchSetupTab(tabId, btn) {
+  document.querySelectorAll('.setup-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.setup-tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+function generateTeamNameInputs() {
+  const n = parseInt(document.getElementById('num-teams-input')?.value || '10');
+  const wrap = document.getElementById('team-name-inputs');
+  if(!wrap) return;
+  loadState();
+  const existing = Object.keys(state.teams);
+  wrap.innerHTML = '';
+  for(let i=0;i<n;i++) {
+    const defName = existing[i] || `Team ${i+1}`;
+    wrap.innerHTML += `<div class="input-group" style="margin-bottom:8px;">
+      <label>Team ${i+1}</label>
+      <input type="text" id="tname-${i}" value="${defName}" />
+    </div>`;
+  }
+}
+
+function applyTeamConfig() {
+  const n = parseInt(document.getElementById('num-teams-input')?.value || '10');
+  loadState();
+  const newTeams = {};
+  for(let i=0;i<n;i++) {
+    const inp = document.getElementById('tname-'+i);
+    const name = inp ? inp.value.trim() || `Team ${i+1}` : `Team ${i+1}`;
+    const existing = state.teams[name];
+    newTeams[name] = existing || { score:0, eliminated:false, correct:0, wrong:0, total:0, powerups:{double:1,skip:1,fifty:1}, fastestQ:-1 };
+  }
+  state.teams = newTeams;
+  broadcastState();
+  refreshTeamSelects();
+  renderScoreOverrideRows();
+  showToast('Teams updated!', 'success');
+}
+
+function loadQuestionsFromFile(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const qs = JSON.parse(e.target.result);
+      QUESTIONS = qs;
+      // Recalculate question counts per round
+      Object.keys(ROUND_INFO).forEach(r => { ROUND_INFO[r].qs = QUESTIONS.filter(q => q.r == r).length; });
+      document.getElementById('q-load-status').textContent = `✓ Loaded ${qs.length} questions`;
+      showToast(`Loaded ${qs.length} questions`, 'success');
+    } catch(err) {
+      document.getElementById('q-load-status').textContent = `✗ Parse error: ${err.message}`;
+      showToast('Failed to parse JSON', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function loadQuestionsFromPaste() {
+  const text = document.getElementById('q-json-paste')?.value.trim();
+  if(!text) { showToast('Nothing to load', 'error'); return; }
+  try {
+    const qs = JSON.parse(text);
+    QUESTIONS = qs;
+    // Recalculate question counts per round
+    Object.keys(ROUND_INFO).forEach(r => { ROUND_INFO[r].qs = QUESTIONS.filter(q => q.r == r).length; });
+    document.getElementById('q-load-status').textContent = `✓ Loaded ${qs.length} questions`;
+    showToast(`Loaded ${qs.length} questions`, 'success');
+  } catch(err) {
+    document.getElementById('q-load-status').textContent = `✗ Parse error: ${err.message}`;
+    showToast('Invalid JSON format', 'error');
+  }
+}
+
+function generateRoundConfigRows() {
+  const wrap = document.getElementById('round-config-rows');
+  if(!wrap) return;
+  wrap.innerHTML = Object.entries(ROUND_INFO).map(([r,info]) => `
+    <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:10px;align-items:end;margin-bottom:12px;">
+      <div class="input-group" style="margin:0;">
+        <label>Round ${r} Name</label>
+        <input type="text" id="rname-${r}" value="${info.name}" />
+      </div>
+      <div class="input-group" style="margin:0;">
+        <label>Time (s)</label>
+        <input type="number" id="rtime-${r}" value="${info.time}" min="5" max="300" />
+      </div>
+      <div class="input-group" style="margin:0;">
+        <label>Neg Mark</label>
+        <select id="rneg-${r}">
+          <option value="0" ${!info.negMark?'selected':''}>No</option>
+          <option value="1" ${info.negMark?'selected':''}>Yes</option>
+        </select>
+      </div>
+    </div>`).join('');
+}
+
+function applyRoundConfig() {
+  // Read global negative marking shortcut
+  const negSel = document.getElementById('neg-marking-sel')?.value;
+  // Read global elimination config
+  const elimSel = document.getElementById('elim-config-sel')?.value;
+
+  Object.keys(ROUND_INFO).forEach(r => {
+    const name = document.getElementById('rname-'+r)?.value;
+    const time = parseInt(document.getElementById('rtime-'+r)?.value);
+    const neg  = document.getElementById('rneg-'+r)?.value === '1';
+    if(name) ROUND_INFO[r].name = name;
+    if(!isNaN(time)) ROUND_INFO[r].time = time;
+    // Per-row neg mark (takes precedence unless overridden by global)
+    ROUND_INFO[r].negMark = neg;
+  });
+
+  // Apply global neg marking shortcut (overrides per-row)
+  if(negSel === 'round3') {
+    Object.keys(ROUND_INFO).forEach(r => { ROUND_INFO[r].negMark = (r == 3); });
+  } else if(negSel === 'all') {
+    Object.keys(ROUND_INFO).forEach(r => { ROUND_INFO[r].negMark = true; });
+  } else if(negSel === 'none') {
+    Object.keys(ROUND_INFO).forEach(r => { ROUND_INFO[r].negMark = false; });
+  }
+
+  // Apply elimination config
+  if(elimSel === 'aggressive') {
+    ELIM_AFTER = { 1:3, 2:3, 3:3 };
+  } else if(elimSel === 'none') {
+    ELIM_AFTER = {};
+  } else if(elimSel === 'standard') {
+    ELIM_AFTER = { 1:2, 2:2, 3:2 };
+  }
+  // 'custom' leaves ELIM_AFTER as-is
+
+  // Recalculate question counts per round from actual QUESTIONS array
+  Object.keys(ROUND_INFO).forEach(r => {
+    ROUND_INFO[r].qs = QUESTIONS.filter(q => q.r == r).length;
+  });
+
+  // Sync per-row selects to reflect any global override
+  Object.keys(ROUND_INFO).forEach(r => {
+    const negEl = document.getElementById('rneg-'+r);
+    if(negEl) negEl.value = ROUND_INFO[r].negMark ? '1' : '0';
+  });
+
+  showToast('Round config saved!', 'success');
+}
+
+function exportResults() {
+  loadState();
+  const data = {
+    exportedAt: new Date().toISOString(),
+    round: state.currentRound,
+    teams: state.teams,
+    questions: QUESTIONS.length,
+    roundInfo: ROUND_INFO,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'analytics_arena_results.json';
+  a.click();
+}
+
+function exportCSV() {
+  loadState();
+  let csv = 'Team,Score,Correct,Wrong,Total,Accuracy,Eliminated\n';
+  Object.entries(state.teams).forEach(([name,d]) => {
+    const acc = d.total > 0 ? Math.round(d.correct/d.total*100) : 0;
+    csv += `${name},${d.score},${d.correct||0},${d.wrong||0},${d.total||0},${acc}%,${d.eliminated?'Yes':'No'}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'analytics_arena_scores.csv';
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════════
+function confirmReset() {
+  if(!confirm('Reset all quiz data? This cannot be undone.')) return;
+  state = defaultState();
+  broadcastState();
+  nextQIdx = 0;
+  lastSeenQ = -1;
+  lastSeenPhase = '';
+  if(opTimerInterval) { clearInterval(opTimerInterval); opTimerInterval = null; }
+  showToast('Quiz reset!', 'success');
+  renderOpLeaderboard();
+  renderScoreOverrideRows();
+  showScreen('operator-screen');
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+function showToast(msg, type='') {
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SESSION RECOVERY
+// ═══════════════════════════════════════════════════════════
+function trySessionRecovery() {
+  try {
+    const saved = sessionStorage.getItem('aa_student');
+    if(saved) {
+      const { myName: n, myTeam: t } = JSON.parse(saved);
+      if(n && t) {
+        document.getElementById('student-name').value = n;
+        document.getElementById('team-select').value = t;
+        // Don't auto-login; let user confirm
+      }
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Restore theme preference
+  try {
+    if(localStorage.getItem('aa_theme') === 'light') toggleTheme();
+  } catch(e){}
+
+  loadState();
+  initUrlRouting();
+  updateNetworkStatus();
+  trySessionRecovery();
+  generateTeamNameInputs();
+  generateRoundConfigRows();
+});
+</script>
+</body>
+</html>
